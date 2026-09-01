@@ -1,0 +1,15 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+@import '../shared/panel-theme.css';
+
+@source '../../../../app/Filament/Resources/**/*';
+@source '../../../../app/Filament/Pages/**/*';
+@source '../../../../app/Filament/Widgets/**/*';
+@source '../../../../resources/views/filament/**/*';
+
+:root {
+    --lms-accent: 79 70 229;
+    --lms-accent-soft: 139 92 246;
+    --lms-sidebar-from: 15 17 42;
+    --lms-sidebar-to: 30 27 75;
+    --lms-glow: 99 102 241;
+}

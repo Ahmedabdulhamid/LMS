@@ -1,0 +1,7 @@
+php artisan queue:work --queue=video-processing --stop-when-empty --tries=1 --timeout=22000 -v
+
+
+
+Integration name	-
+Transaction processed callback	https://josh-reactions-posted-cutting.trycloudflare.com/api/paymob/webhook
+Transaction response callback	https://josh-reactions-posted-cutting.trycloudflare.com/payment/callback
