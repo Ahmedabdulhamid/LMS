@@ -5,6 +5,14 @@
 
     RewriteEngine On
 
+    # Never serve hidden files, application source, configuration, or deployment
+    # artifacts from a web root.
+    RewriteRule ^(?:\.git(?:/|$)|\.env(?:\..*)?|\.gitignore$) - [F,L,NC]
+    RewriteRule ^(?:app|bootstrap|config|database|resources|routes|tests|vendor)(?:/|$) - [F,L,NC]
+    RewriteRule ^(?:artisan|composer\.(?:json|lock)|package(?:-lock)?\.json|vite\.config\.[^/]+|phpunit\.xml)$ - [F,L,NC]
+    RewriteRule \.(?:bak|backup|dump|log|old|orig|sql|sqlite|sqlite3|swp|tmp|zip)$ - [F,L,NC]
+    RewriteRule ^(?:storage/(?:app|framework|logs)(?:/|$)|storage/.*\.php$) - [F,L,NC]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
