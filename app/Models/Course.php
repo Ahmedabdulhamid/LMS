@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
@@ -114,6 +115,11 @@ class Course extends Model
     public function progress(): HasMany
     {
         return $this->hasMany(UserCourseProgress::class);
+    }
+
+    public function videos(): HasManyThrough
+    {
+        return $this->hasManyThrough(CourseVideo::class, Section::class);
     }
 
     public function couponUsages(): HasMany

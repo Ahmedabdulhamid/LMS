@@ -4,11 +4,14 @@ namespace App\Observers;
 
 use App\Models\Enrollment;
 use App\Services\CourseCounterService;
+use App\Services\InstructorDashboardService;
 use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 use Illuminate\Support\Facades\Cache;
 
 class EnrollmentObserver implements ShouldHandleEventsAfterCommit
 {
+    public function __construct(private readonly InstructorDashboardService $dashboard) {}
+
     public function saved(Enrollment $enrollment): void
     {
         $this->syncCourse($enrollment);
@@ -25,6 +28,7 @@ class EnrollmentObserver implements ShouldHandleEventsAfterCommit
 
         if ($course = $enrollment->course) {
             app(CourseCounterService::class)->syncStudents($course);
+            $this->dashboard->clearInstructorDashboardCache($course->instructor_id);
         }
     }
 }

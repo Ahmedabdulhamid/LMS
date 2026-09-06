@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Instructors\Pages\Auth\EditProfile;
+use App\Filament\Instructors\Pages\Dashboard;
 use App\Http\Middleware\AuthenticatePanelSession;
 use App\Http\Middleware\EnsurePanelUserType;
 use App\Http\Middleware\SetLocale;
@@ -12,13 +13,11 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Pages\Dashboard;
+use Filament\Navigation\NavigationItem;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\View\PanelsRenderHook;
-use Filament\Widgets\AccountWidget;
-use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -55,10 +54,14 @@ class InstructorsPanelProvider extends PanelProvider
             ->pages([
                 Dashboard::class,
             ])
+            ->navigationItems([
+                NavigationItem::make(fn (): string => __('instructor.navigation.profile'))
+                    ->icon('heroicon-o-user-circle')
+                    ->sort(6)
+                    ->url(fn (): string => route('filament.instructors.auth.profile')),
+            ])
             ->discoverWidgets(in: app_path('Filament/Instructors/Widgets'), for: 'App\Filament\Instructors\Widgets')
             ->widgets([
-                AccountWidget::class,
-                FilamentInfoWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

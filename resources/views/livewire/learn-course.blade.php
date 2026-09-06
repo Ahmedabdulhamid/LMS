@@ -36,6 +36,7 @@
                         :poster="$this->thumbnailUrl()"
                         :watermark="auth('student')->user()?->email ?? config('app.name')"
                         :autoplay="$autoplaySelectedVideo"
+                        :resume-at="($lessonProgress[$this->selectedVideo->id]['completed'] ?? false) ? 0 : ($lessonProgress[$this->selectedVideo->id]['position'] ?? 0)"
                     />
                 </div>
 
@@ -77,8 +78,11 @@
                                 wire:click="selectVideo({{ $video->id }})"
                                 @class(['active' => $selectedVideoId === $video->id])
                             >
-                                <i>{{ $selectedVideoId === $video->id ? '▶' : str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</i>
+                                <i>{{ ($lessonProgress[$video->id]['completed'] ?? false) ? '✓' : ($selectedVideoId === $video->id ? '▶' : str_pad($loop->iteration, 2, '0', STR_PAD_LEFT)) }}</i>
                                 <span><b>{{ $video->title }}</b><small>{{ $formatDuration($video->duration) }}</small></span>
+                                @if (($lessonProgress[$video->id]['progress'] ?? 0) > 0)
+                                    <em>{{ $lessonProgress[$video->id]['progress'] }}%</em>
+                                @endif
                             </button>
                         @empty
                             <p>{{ $ar ? 'لا توجد دروس منشورة في هذا القسم.' : 'No published lessons in this section.' }}</p>

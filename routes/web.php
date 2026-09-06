@@ -5,6 +5,7 @@ use App\Http\Controllers\HomePageController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\VideoStreamController;
 use App\Livewire\CheckoutOrder;
+use App\Livewire\ContactPage;
 use App\Livewire\LearnCourse;
 use App\Livewire\MyCourses;
 use App\Livewire\ShowCourse;
@@ -48,6 +49,7 @@ Route::get('/courses/latest', [HomePageController::class, 'latestCourses'])->nam
 Route::get('/wishlists', WishlistsPage::class)->middleware('auth:student')->name('wishlists.index');
 Route::get('/my-courses', MyCourses::class)->middleware('auth:student')->name('my-courses.index');
 Route::get('/subscription-plans', SubscriptionPlans::class)->name('subscription-plans.index');
+Route::get('/contact', ContactPage::class)->name('contact.index');
 Route::get('/checkout/orders/{order:number}', CheckoutOrder::class)
     ->middleware('auth:student')
     ->name('checkout.orders.show');

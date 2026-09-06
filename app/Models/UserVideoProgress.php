@@ -13,8 +13,10 @@ class UserVideoProgress extends Model
 
     protected $casts = [
         'progress' => 'integer',
+        'last_position_seconds' => 'integer',
         'is_completed' => 'boolean',
         'completed_at' => 'datetime',
+        'last_watched_at' => 'datetime',
     ];
 
     public function user(): BelongsTo

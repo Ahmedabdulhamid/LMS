@@ -2,8 +2,10 @@
 @import '../shared/panel-theme.css';
 
 @source '../../../../app/Filament/Sudents/**/*';
+@source '../../../../app/Filament/Student/**/*';
 @source '../../../../resources/views/filament/students/**/*';
 @source '../../../../resources/views/filament/components/**/*';
+@source '../../../../resources/views/student-*.blade.php';
 
 :root {
     --lms-accent: 5 150 105;

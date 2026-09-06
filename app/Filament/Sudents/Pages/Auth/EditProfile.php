@@ -69,12 +69,24 @@ class EditProfile extends BaseEditProfile
                                     $this->getNameFormComponent()
                                         ->label(__('lms.fields.full_name'))
                                         ->prefixIcon('heroicon-o-user'),
-                                    TextInput::make('phone')
-                                        ->label(__('lms.fields.phone'))
-                                        ->tel()
-                                        ->prefixIcon('heroicon-o-phone')
-                                        ->unique(ignoreRecord: true)
-                                        ->maxLength(20),
+ TextInput::make('phone')
+ ->label(__('lms.fields.phone'))
+ ->tel()
+ ->prefixIcon('heroicon-o-phone')
+ ->unique(ignoreRecord: true)
+ ->maxLength(20),
+ TextInput::make('grade')
+ ->label(__('student-panel.profile.grade'))
+ ->maxLength(100),
+ TextInput::make('group')
+ ->label(__('student-panel.profile.group'))
+ ->maxLength(100),
+                                    TextInput::make('grade')
+                                        ->label(__('student.profile.grade'))
+                                        ->maxLength(100),
+                                    TextInput::make('group')
+                                        ->label(__('student.profile.group'))
+                                        ->maxLength(100),
                                     Textarea::make('bio')
                                         ->label(__('lms.fields.bio'))
                                         ->helperText(__('lms.help.student_bio'))

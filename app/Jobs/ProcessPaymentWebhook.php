@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Models\PaymentWebhookEvent;
 use App\Services\PaymentAlertService;
 use App\Services\PaymobTransactionProcessor;
+use App\Services\StudentPaymentNotificationService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -59,5 +60,9 @@ class ProcessPaymentWebhook implements ShouldBeUnique, ShouldQueue
             'event_id' => $event->id,
             'transaction_id' => $event->provider_transaction_id,
         ]);
+
+        if ($event->order_id) {
+            app(StudentPaymentNotificationService::class)->failed((int) $event->order_id);
+        }
     }
 }

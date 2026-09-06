@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Course;
 use App\Models\CourseVideo;
 use App\Services\CourseAccessService;
+use App\Services\StudentProgressService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -18,6 +19,9 @@ class LearnCourse extends Component
     public ?int $selectedVideoId = null;
 
     public bool $autoplaySelectedVideo = false;
+
+    /** @var array<int, array{progress: int, position: int, completed: bool}> */
+    public array $lessonProgress = [];
 
     public function mount(Course $course, CourseAccessService $courseAccess): void
     {
@@ -40,7 +44,19 @@ class LearnCourse extends Component
         );
 
         $this->course = $course;
-        $this->selectedVideoId = $course->sections->flatMap->videos->first()?->id;
+        $videoIds = $course->sections->flatMap->videos->pluck('id');
+        $progress = Auth::guard('student')->user()->videoProgress()
+            ->whereIn('video_id', $videoIds)
+            ->get()
+            ->keyBy('video_id');
+
+        $this->lessonProgress = $progress->map(fn ($item): array => [
+            'progress' => $item->progress,
+            'position' => $item->last_position_seconds,
+            'completed' => $item->is_completed,
+        ])->all();
+        $this->selectedVideoId = $progress->sortByDesc('last_watched_at')->keys()->first()
+            ?? $videoIds->first();
     }
 
     public function selectVideo(int $videoId, CourseAccessService $courseAccess): void
@@ -53,6 +69,22 @@ class LearnCourse extends Component
         $this->autoplaySelectedVideo = true;
         unset($this->selectedVideo);
         $this->dispatch('course-video-changed');
+    }
+
+    public function saveVideoProgress(int $videoId, int $positionSeconds, int $durationSeconds, bool $ended, CourseAccessService $courseAccess, StudentProgressService $progressService): void
+    {
+        $student = Auth::guard('student')->user();
+        $video = $this->course->sections->flatMap->videos->firstWhere('id', $videoId);
+
+        abort_unless($video instanceof CourseVideo, 404);
+        abort_unless($courseAccess->canAccessVideo($student, $video), 403);
+
+        $progress = $progressService->record($student, $video, $positionSeconds, $durationSeconds, $ended);
+        $this->lessonProgress[$videoId] = [
+            'progress' => $progress->progress,
+            'position' => $progress->last_position_seconds,
+            'completed' => $progress->is_completed,
+        ];
     }
 
     #[Computed]

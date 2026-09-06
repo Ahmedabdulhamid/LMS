@@ -29,6 +29,7 @@
             <a href="#courses">{{ $ar ? 'الكورسات' : 'Courses' }}</a>
             <a href="{{ route('subscription-plans.index') }}">{{ $ar ? 'الاشتراكات' : 'Subscriptions' }}</a>
             <a href="#reviews">{{ $ar ? 'آراء الطلاب' : 'Stories' }}</a>
+            <a href="{{ route('contact.index') }}">{{ $ar ? 'تواصل معنا' : 'Contact' }}</a>
         </nav>
         <div class="nav-actions">
             <a class="lang" href="{{ route('locale.switch', $ar ? 'en' : 'ar') }}">{{ $ar ? 'EN' : 'ع' }}</a>
@@ -42,6 +43,7 @@
         <a href="#courses">{{ $ar ? 'الكورسات' : 'Courses' }}</a>
         <a href="{{ route('subscription-plans.index') }}">{{ $ar ? 'الاشتراكات' : 'Subscriptions' }}</a>
         <a href="#reviews">{{ $ar ? 'آراء الطلاب' : 'Stories' }}</a>
+        <a href="{{ route('contact.index') }}">{{ $ar ? 'تواصل معنا' : 'Contact' }}</a>
         <a href="/students/login">{{ $ar ? 'دخول الطالب' : 'Student sign in' }}</a>
     </div>
 </header>

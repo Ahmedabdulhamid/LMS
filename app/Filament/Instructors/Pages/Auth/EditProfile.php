@@ -23,7 +23,7 @@ class EditProfile extends BaseEditProfile
 {
     public function getTitle(): string|Htmlable
     {
-        return __('lms.profile.instructor_title');
+        return __('instructor.profile.title');
     }
 
     public function getSubheading(): string|Htmlable|null

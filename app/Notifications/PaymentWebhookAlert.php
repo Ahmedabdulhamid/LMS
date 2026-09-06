@@ -3,10 +3,12 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Str;
 
-class PaymentWebhookAlert extends Notification
+class PaymentWebhookAlert extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -23,14 +25,26 @@ class PaymentWebhookAlert extends Notification
 
     public function toMail(object $notifiable): MailMessage
     {
-        $mail = (new MailMessage)->subject($this->subject)->line($this->message);
+        $locale = str_starts_with(app()->getLocale(), 'ar') ? 'ar' : 'en';
 
-        foreach ($this->context as $key => $value) {
-            if (is_scalar($value) || $value === null) {
-                $mail->line(str_replace('_', ' ', ucfirst((string) $key)).': '.(string) $value);
-            }
-        }
-
-        return $mail;
+        return (new MailMessage)
+            ->subject($this->subject)
+            ->view('emails.payment-webhook-alert', [
+                'alertSubject' => $this->subject,
+                'alertMessage' => $this->message,
+                'contextItems' => collect($this->context)
+                    ->filter(fn (mixed $value): bool => is_scalar($value) || $value === null)
+                    ->map(fn (mixed $value, string | int $key): array => [
+                        'label' => Str::headline((string) $key),
+                        'value' => match (true) {
+                            is_bool($value) => $value ? __('payment-alert.yes', locale: $locale) : __('payment-alert.no', locale: $locale),
+                            $value === null, $value === '' => '—',
+                            default => (string) $value,
+                        },
+                    ])
+                    ->values()
+                    ->all(),
+                'locale' => $locale,
+            ]);
     }
 }

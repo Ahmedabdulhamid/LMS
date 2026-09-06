@@ -11,6 +11,7 @@ use App\Models\Instructor;
 use App\Models\User;
 use App\Services\CourseAccessService;
 use App\Services\EnrollmentService;
+use App\Services\StudentProgressService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -81,6 +82,34 @@ class CourseAccessServiceTest extends TestCase
 
         $video->forceFill(['is_free' => true])->saveQuietly();
         $this->assertTrue($service->canAccessVideo(null, $video->refresh()));
+    }
+
+    public function test_video_playback_updates_lesson_and_course_progress(): void
+    {
+        [$course, $firstVideo] = $this->courseVideo();
+        $student = User::factory()->create();
+        $secondVideo = new CourseVideo([
+            'title' => 'Second lesson', 'url' => 'courses/second.mp4', 'duration' => 60,
+            'order' => 2, 'is_free' => false, 'is_published' => true,
+        ]);
+        $secondVideo->section_id = $firstVideo->section_id;
+        $secondVideo->saveQuietly();
+        $service = app(StudentProgressService::class);
+
+        $partial = $service->record($student, $firstVideo, 30, 60);
+        $this->assertSame(50, $partial->progress);
+        $this->assertFalse($partial->is_completed);
+        $this->assertSame(0, $student->courseProgress()->where('course_id', $course->id)->value('progress'));
+
+        $completed = $service->record($student, $firstVideo, 54, 60);
+        $this->assertTrue($completed->is_completed);
+        $this->assertSame(100, $completed->progress);
+        $this->assertSame(50, $student->courseProgress()->where('course_id', $course->id)->value('progress'));
+
+        $service->record($student, $secondVideo->load('section.course'), 60, 60, ended: true);
+        $courseProgress = $student->courseProgress()->where('course_id', $course->id)->firstOrFail();
+        $this->assertSame(100, $courseProgress->progress);
+        $this->assertNotNull($courseProgress->completed_at);
     }
 
     private function courseVideo(): array

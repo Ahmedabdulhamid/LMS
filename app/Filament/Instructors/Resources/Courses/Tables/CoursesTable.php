@@ -25,21 +25,21 @@ class CoursesTable
         return $table
             ->columns([
                 TextColumn::make('title')
-                    ->label(__('lms.instructor.course_table.title'))
+                    ->label(__('instructor.courses.fields.title'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('category.name')
-                    ->label(__('lms.instructor.course_table.category'))
+                    ->label(__('instructor.courses.fields.category'))
                     ->sortable(),
                 TextColumn::make('price')
-                    ->label(__('lms.instructor.course_table.price'))
+                    ->label(__('instructor.courses.fields.price'))
                     ->money('EGP')
                     ->sortable(),
                 TextColumn::make('number_lessons')
-                    ->label(__('lms.instructor.course_table.lessons'))
+                    ->label(__('instructor.courses.fields.lessons'))
                     ->sortable(),
                 TextColumn::make('duration')
-                    ->label(__('lms.instructor.course_table.duration'))
+                    ->label(__('instructor.courses.fields.duration'))
                     ->sortable()
                     ->formatStateUsing(function ($state) {
                         return \Carbon\CarbonInterval::seconds($state)
@@ -47,22 +47,23 @@ class CoursesTable
                             ->forHumans();
                     }),
                 IconColumn::make('is_published')
-                    ->label(__('lms.instructor.course_table.published'))
+                    ->label(__('instructor.courses.fields.published'))
                     ->boolean()
                     ->sortable(),
                 TextColumn::make('updated_at')
-                    ->label(__('lms.instructor.course_table.updated'))
+                    ->label(__('instructor.courses.fields.updated'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                TernaryFilter::make('is_published'),
+                TernaryFilter::make('is_published')->label(__('instructor.courses.fields.published')),
             ])
             ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
+                ViewAction::make()->label(__('instructor.courses.actions.view')),
+                EditAction::make()->label(__('instructor.courses.actions.edit')),
                 Action::make('delete')
+                    ->label(__('instructor.courses.actions.delete'))
                     ->action(function (Model $record) {
                         $record->sections()->with('videos')->get()
                             ->each(function ($section) {
@@ -75,12 +76,9 @@ class CoursesTable
                             });
 
                         return (bool) $record->delete();
-                    })->modalSubmitActionLabel(__('filament-actions::delete.single.modal.actions.delete.label'))
-                    ->modalHeading(fn(Action $action): string => __('filament-actions::delete.single.modal.heading', ['label' => $action->getRecordTitle()]))
-
-                    ->modalSubmitActionLabel(__('filament-actions::delete.single.modal.actions.delete.label'))
-
-                    ->successNotificationTitle(__('filament-actions::delete.single.notifications.deleted.title'))
+                    })->modalSubmitActionLabel(__('instructor.courses.actions.delete'))
+                    ->modalHeading(fn(Action $action): string => __('instructor.courses.actions.delete_confirm', ['course' => $action->getRecordTitle()]))
+                    ->successNotificationTitle(__('instructor.courses.actions.delete_success'))
 
                     ->defaultColor('danger')
 
@@ -97,6 +95,8 @@ class CoursesTable
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->emptyStateHeading(__('instructor.courses.empty_heading'))
+            ->emptyStateDescription(__('instructor.courses.empty_description'));
     }
 }

@@ -5,6 +5,53 @@ shaka.polyfill.installAll();
 
 const players = new WeakMap();
 
+function livewireComponent(container) {
+    const root = container.closest('[wire\\:id]');
+
+    return root ? Livewire.find(root.getAttribute('wire:id')) : null;
+}
+
+function trackProgress(container, video) {
+    let lastSavedPosition = Number(container.dataset.resumeAt || 0);
+    let saving = false;
+
+    const save = async (ended = false) => {
+        const position = Math.floor(video.currentTime || 0);
+        const duration = Math.floor(video.duration || 0);
+
+        if (!duration || saving || (!ended && Math.abs(position - lastSavedPosition) < 10)) return;
+
+        const component = livewireComponent(container);
+        if (!component) return;
+
+        saving = true;
+
+        try {
+            await component.call('saveVideoProgress', Number(container.dataset.videoId), position, duration, ended);
+            lastSavedPosition = position;
+        } finally {
+            saving = false;
+        }
+    };
+
+    const onTimeUpdate = () => save(false);
+    const onEnded = () => save(true);
+    const onPause = () => save(false);
+
+    video.addEventListener('timeupdate', onTimeUpdate);
+    video.addEventListener('ended', onEnded);
+    video.addEventListener('pause', onPause);
+
+    return {
+        flush: () => save(false),
+        destroy: () => {
+            video.removeEventListener('timeupdate', onTimeUpdate);
+            video.removeEventListener('ended', onEnded);
+            video.removeEventListener('pause', onPause);
+        },
+    };
+}
+
 function showPlaybackError(container) {
     if (container.querySelector('[data-playback-error]')) return;
 
@@ -39,6 +86,14 @@ async function initialize(container) {
             container.dataset.error = String(event.detail?.code || 'playback');
         });
         await player.load(container.dataset.manifest);
+
+        const resumeAt = Number(container.dataset.resumeAt || 0);
+        if (resumeAt > 0 && resumeAt < video.duration - 5) {
+            video.currentTime = resumeAt;
+        }
+
+        const progressTracker = trackProgress(container, video);
+        players.set(container, { player, overlay, progressTracker });
 
         if (container.dataset.autoplay === 'true') {
             try {
@@ -78,6 +133,8 @@ const observer = new MutationObserver((mutations) => {
 
             containers.forEach((container) => {
                 const instance = players.get(container);
+                instance?.progressTracker.flush();
+                instance?.progressTracker.destroy();
                 instance?.overlay.destroy();
                 instance?.player.destroy();
                 players.delete(container);

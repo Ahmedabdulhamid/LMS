@@ -70,9 +70,10 @@ class OrderService
                 'unit_price' => $this->fromCents($unitPrice),
                 'discount_amount' => $this->fromCents($discountTotal),
                 'total' => $this->fromCents($total),
-                'metadata' => [
-                    'course_slug' => $course->slug,
-                    'instructor_id' => $course->instructor_id,
+ 'metadata' => [
+ 'course_slug' => $course->slug,
+ 'instructor_id' => $course->instructor_id,
+ 'locale' => app()->getLocale(),
                 ],
             ]);
 
@@ -133,10 +134,11 @@ class OrderService
                 'unit_price' => $this->fromCents($total),
                 'discount_amount' => '0.00',
                 'total' => $this->fromCents($total),
-                'metadata' => [
-                    'duration_value' => $plan->duration_value,
-                    'duration_unit' => $plan->duration_unit->value,
-                    'courses_count' => $plan->courses()->count(),
+ 'metadata' => [
+ 'duration_value' => $plan->duration_value,
+ 'duration_unit' => $plan->duration_unit->value,
+ 'courses_count' => $plan->courses()->count(),
+ 'locale' => app()->getLocale(),
                 ],
             ]);
 

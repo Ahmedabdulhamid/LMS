@@ -19,7 +19,7 @@ class EditCourse extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            ViewAction::make(),
+            ViewAction::make()->label(__('instructor.courses.actions.view')),
 
 
 

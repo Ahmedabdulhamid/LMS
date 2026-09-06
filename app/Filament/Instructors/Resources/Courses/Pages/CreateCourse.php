@@ -32,6 +32,6 @@ class CreateCourse extends CreateRecord
 
     protected function getCreatedNotificationTitle(): ?string
     {
-        return __('lms.instructor.messages.course_created');
+        return __('instructor.courses.notifications.created');
     }
 }

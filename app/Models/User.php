@@ -20,7 +20,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
 
-#[Fillable(['name', 'email', 'password', 'phone', 'image', 'bio', 'is_active', 'last_login_at'])]
+#[Fillable(['name', 'email', 'password', 'phone', 'grade', 'group', 'image', 'bio', 'is_active', 'last_login_at'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerifyEmail
 {
@@ -89,6 +89,16 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
     public function subscriptions(): HasMany
     {
         return $this->hasMany(Subscription::class);
+    }
+
+    public function courseProgress(): HasMany
+    {
+        return $this->hasMany(UserCourseProgress::class);
+    }
+
+    public function videoProgress(): HasMany
+    {
+        return $this->hasMany(UserVideoProgress::class);
     }
 
     public function enrolledCourses(): BelongsToMany

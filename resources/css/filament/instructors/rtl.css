@@ -1,0 +1,39 @@
+[dir='rtl'] .fi-main,
+[dir='rtl'] .fi-sidebar,
+[dir='rtl'] .fi-ta,
+[dir='rtl'] .fi-fo-field,
+[dir='rtl'] .premium-course,
+[dir='rtl'] .instructor-profile-hero,
+[dir='rtl'] input,
+[dir='rtl'] textarea,
+[dir='rtl'] select {
+    text-align: right;
+}
+
+[dir='rtl'] .fi-ta-table {
+    direction: rtl;
+}
+
+[dir='ltr'] .fi-main,
+[dir='ltr'] .fi-ta-table,
+[dir='ltr'] .premium-course,
+[dir='ltr'] .instructor-profile-hero,
+[dir='ltr'] input,
+[dir='ltr'] textarea,
+[dir='ltr'] select {
+    direction: ltr;
+}
+
+[dir='rtl'] .pc-hero::after {
+    transform: scaleX(-1);
+}
+
+[dir='rtl'] .premium-course .right-9 {
+    right: auto;
+    left: 2.25rem;
+}
+
+[dir='rtl'] .premium-course .text-left,
+[dir='rtl'] .premium-course .text-right {
+    text-align: right;
+}

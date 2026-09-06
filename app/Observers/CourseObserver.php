@@ -4,12 +4,15 @@ namespace App\Observers;
 
 use App\Models\Course;
 use App\Services\HomePageService;
+use App\Services\InstructorDashboardService;
 use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
 class CourseObserver implements ShouldHandleEventsAfterCommit
 {
+    public function __construct(private readonly InstructorDashboardService $dashboard) {}
+
     public function updated(Course $course): void
     {
         if ($course->isDirty('thumbnail')) {
@@ -45,6 +48,7 @@ class CourseObserver implements ShouldHandleEventsAfterCommit
 
     private function forget(int $instructorId, int $courseId): void
     {
+        $this->dashboard->clearInstructorDashboardCache($instructorId);
         Cache::forget("instructor_courses_{$instructorId}");
         Cache::forget("instructor_{$instructorId}_course_{$courseId}");
         Cache::forget("courses.show.{$courseId}");

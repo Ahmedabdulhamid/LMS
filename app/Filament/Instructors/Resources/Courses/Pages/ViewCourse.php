@@ -63,7 +63,7 @@ class ViewCourse extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            EditAction::make(),
+            EditAction::make()->label(__('instructor.courses.actions.edit')),
         ];
     }
 }

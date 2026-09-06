@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class UserCourseProgress extends Model
 {
+    protected $guarded = ['id'];
+
     protected $casts = [
         'progress' => 'integer',
         'last_accessed_at' => 'datetime',

@@ -1,7 +1,7 @@
-<div @class(['lms-language-switcher', 'is-floating' => $floating ?? false]) dir="ltr">
-    <a href="{{ route('locale.switch', 'en') }}" @class(['is-active' => app()->isLocale('en')])>EN</a>
+<div @class(['lms-language-switcher', 'is-floating' => $floating ?? false]) dir="ltr" aria-label="{{ __('instructor.language_switcher.label') }}">
+    <a href="{{ route('locale.switch', 'en') }}" hreflang="en" @class(['is-active' => app()->isLocale('en')])>{{ __('instructor.language_switcher.english') }}</a>
     <span></span>
-    <a href="{{ route('locale.switch', 'ar') }}" @class(['is-active' => app()->isLocale('ar')])>AR</a>
+    <a href="{{ route('locale.switch', 'ar') }}" hreflang="ar" @class(['is-active' => app()->isLocale('ar')])>{{ __('instructor.language_switcher.arabic') }}</a>
 </div>
 
 <style>

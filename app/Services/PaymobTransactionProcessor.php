@@ -11,8 +11,9 @@ class PaymobTransactionProcessor
 {
     public function __construct(
         private readonly PaymobService $paymobService,
-        private readonly PaymentSuccessHandler $paymentSuccessHandler,
-        private readonly PaymentAlertService $alerts,
+ private readonly PaymentSuccessHandler $paymentSuccessHandler,
+ private readonly PaymentAlertService $alerts,
+ private readonly StudentPaymentNotificationService $studentNotifications,
     ) {}
 
     public function process(PaymentWebhookEvent $event): void
@@ -84,22 +85,29 @@ class PaymobTransactionProcessor
 
             $successful = $this->truthy($transaction['success'] ?? false)
                 && ! $this->truthy($transaction['error_occured'] ?? false);
-            if (! $successful) {
-                if ($order->payment_status !== 'paid') {
+ if (! $successful) {
+ $shouldNotifyStudent = $order->payment_status !== 'paid'
+ && $order->payment_status !== 'failed';
+ if ($order->payment_status !== 'paid') {
                     $order->update([
                         'payment_status' => 'failed',
                         'paymob_transaction_id' => $event->provider_transaction_id,
                     ]);
                 }
                 $attempt->update(['status' => 'failed', 'processed_at' => now()]);
-                $this->complete($event);
+ $this->complete($event);
 
-                return;
+ if ($shouldNotifyStudent) {
+ DB::afterCommit(fn () => $this->studentNotifications->failed($order->id));
+ }
+
+ return;
             }
 
             if ($order->payment_status !== 'paid') {
-                $order->update(['paymob_transaction_id' => $event->provider_transaction_id]);
-                $this->paymentSuccessHandler->handle($order);
+ $order->update(['paymob_transaction_id' => $event->provider_transaction_id]);
+ $this->paymentSuccessHandler->handle($order);
+ DB::afterCommit(fn () => $this->studentNotifications->succeeded($order->id));
             }
             $attempt->update(['status' => 'paid', 'processed_at' => now()]);
             $this->complete($event);
@@ -128,9 +136,12 @@ class PaymobTransactionProcessor
         DB::afterCommit(fn () => $this->alerts->send('Payment webhook rejected', $reason, [
             'event_id' => $event->id,
             'transaction_id' => $event->provider_transaction_id,
-            'provider_order_id' => $event->provider_order_id,
-        ]));
-    }
+ 'provider_order_id' => $event->provider_order_id,
+ ]));
+ if ($event->order_id) {
+ DB::afterCommit(fn () => $this->studentNotifications->failed((int) $event->order_id));
+ }
+ }
 
     private function complete(PaymentWebhookEvent $event): void
     {

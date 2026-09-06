@@ -12,6 +12,7 @@ export default defineConfig({
                 'resources/css/catalog.css',
                 'resources/css/course-learn.css',
                 'resources/css/course-show.css',
+                'resources/css/contact.css',
                 'resources/css/filament/admin/theme.css',
                 'resources/css/filament/instructors/theme.css',
                 'resources/css/filament/students/theme.css',

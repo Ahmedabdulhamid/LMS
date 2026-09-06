@@ -84,7 +84,7 @@ class SubscriptionPlansTest extends TestCase
         $this->assertSame(OrderStatus::Pending, $order->status);
         $this->assertSame($plan->getMorphClass(), $item->purchasable_type);
         $this->assertSame($plan->id, $item->purchasable_id);
-        $this->assertSame(['duration_value' => 1, 'duration_unit' => 'month', 'courses_count' => 0], $item->metadata);
+ $this->assertSame(['duration_value' => 1, 'duration_unit' => 'month', 'courses_count' => 0, 'locale' => 'en'], $item->metadata);
         $this->assertDatabaseCount('subscriptions', 0);
         $this->assertDatabaseCount('enrollments', 0);
     }

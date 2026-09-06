@@ -24,19 +24,21 @@ class CourseResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'title';
 
+    protected static ?int $navigationSort = 2;
+
     public static function getNavigationLabel(): string
     {
-        return __('lms.instructor.resources.courses');
+        return __('instructor.navigation.courses');
     }
 
     public static function getModelLabel(): string
     {
-        return __('lms.instructor.resources.course');
+        return __('instructor.resources.course.singular');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('lms.instructor.resources.courses');
+        return __('instructor.resources.course.plural');
     }
 
     public static function form(Schema $schema): Schema

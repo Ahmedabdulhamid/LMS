@@ -13,6 +13,7 @@ class Subscription extends Model
     protected $casts = [
         'starts_at' => 'datetime',
         'ends_at' => 'datetime',
+        'expiry_warning_for' => 'datetime',
         'status' => SubscriptionStatus::class,
     ];
 

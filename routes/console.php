@@ -8,7 +8,11 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 Schedule::command('app:end-active-subscription')
-    ->daily();
+    ->daily()
+    ->withoutOverlapping();
 Schedule::command('payments:reconcile --limit=200')
     ->everyTenMinutes()
+    ->withoutOverlapping();
+Schedule::command('app:order-archive')
+    ->monthly()
     ->withoutOverlapping();

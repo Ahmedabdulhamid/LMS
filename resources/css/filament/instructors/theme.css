@@ -1,5 +1,6 @@
 @import '../../../../vendor/filament/filament/resources/css/theme.css';
 @import '../shared/panel-theme.css';
+@import './rtl.css';
 
 @source '../../../../app/Filament/Instructors/**/*';
 @source '../../../../resources/views/filament/instructors/**/*';

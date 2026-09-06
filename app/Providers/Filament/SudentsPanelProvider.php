@@ -12,9 +12,13 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Pages\Dashboard;
+use App\Filament\Student\Pages\Dashboard;
+use App\Filament\Student\Pages\Profile;
+use App\Filament\Student\Resources\CourseResource;
+use App\Filament\Student\Resources\PaymentResource;
 use Filament\Panel;
 use Filament\PanelProvider;
+use Filament\Navigation\NavigationItem;
 use Filament\Support\Colors\Color;
 use Filament\View\PanelsRenderHook;
 use Filament\Widgets\AccountWidget;
@@ -38,7 +42,7 @@ class SudentsPanelProvider extends PanelProvider
             ->registration(Register::class)
              ->passwordReset()
             ->emailVerification()
-            ->profile(EditProfile::class, isSimple: false)
+            ->profile(Profile::class, isSimple: false)
             ->authGuard('student')
             ->darkMode()
             ->userMenu()
@@ -49,15 +53,20 @@ class SudentsPanelProvider extends PanelProvider
                 'primary' => Color::Amber,
             ])
             ->defaultThemeMode(ThemeMode::Dark)
-            ->discoverResources(in: app_path('Filament/Sudents/Resources'), for: 'App\Filament\Sudents\Resources')
-            ->discoverPages(in: app_path('Filament/Sudents/Pages'), for: 'App\Filament\Sudents\Pages')
+            ->resources([
+                CourseResource::class,
+                PaymentResource::class,
+            ])
             ->pages([
                 Dashboard::class,
             ])
-            ->discoverWidgets(in: app_path('Filament/Sudents/Widgets'), for: 'App\Filament\Sudents\Widgets')
-            ->widgets([
-                AccountWidget::class,
-                FilamentInfoWidget::class,
+            ->widgets([])
+            ->navigationItems([
+                NavigationItem::make(fn (): string => __('student-panel.navigation.profile'))
+                    ->icon('heroicon-o-user-circle')
+                    ->url(fn (): string => route('filament.students.auth.profile'))
+                    ->isActiveWhen(fn (): bool => request()->routeIs('filament.students.auth.profile'))
+                    ->sort(4),
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -83,6 +92,10 @@ class SudentsPanelProvider extends PanelProvider
             ->renderHook(
                 PanelsRenderHook::SIMPLE_LAYOUT_START,
                 fn () => view('filament.components.language-switcher', ['floating' => true]),
+            )
+            ->renderHook(
+                PanelsRenderHook::SIDEBAR_NAV_END,
+                fn () => view('student-sidebar-logout'),
             );
     }
 }
