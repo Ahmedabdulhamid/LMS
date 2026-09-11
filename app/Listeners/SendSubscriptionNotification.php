@@ -10,7 +10,7 @@ class SendSubscriptionNotification
 {
     public function handle(SubscriptionCreated $event): void
     {
-        Admin::query()->each(fn (Admin $admin) => $admin->notify(
+        Admin::query()->each(fn (Admin $admin) => $admin->notifyNow(
             new SubscriptionCreatedNotification($event->subscription),
         ));
     }

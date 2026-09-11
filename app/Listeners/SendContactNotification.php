@@ -11,7 +11,7 @@ class SendContactNotification
     public function handle(ContactCreated $event): void
     {
         Admin::query()->each(function (Admin $admin) use ($event): void {
-            $admin->notify(
+            $admin->notifyNow(
                 new ContactBroadcastNotification($event->contact)
             );
         });

@@ -46,6 +46,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->defaultThemeMode(ThemeMode::Dark)
             ->databaseNotifications()
+            ->databaseNotificationsPolling(null)
 
 
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')

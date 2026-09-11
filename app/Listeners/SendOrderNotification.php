@@ -10,7 +10,7 @@ class SendOrderNotification
 {
     public function handle(OrderCreated $event): void
     {
-        Admin::query()->each(fn (Admin $admin) => $admin->notify(
+        Admin::query()->each(fn (Admin $admin) => $admin->notifyNow(
             new OrderCreatedNotification($event->order),
         ));
     }
