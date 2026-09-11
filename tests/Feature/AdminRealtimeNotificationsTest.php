@@ -22,6 +22,11 @@ class AdminRealtimeNotificationsTest extends TestCase
             'name' => 'Admin', 'email' => 'realtime@example.test', 'password' => 'password',
         ]);
 
+        $this->actingAs($admin, 'admin');
+        Filament::setCurrentPanel(Filament::getPanel('admin'));
+        $component = new \App\Livewire\AdminDatabaseNotifications;
+        $this->assertSame('refresh', $component->getListeners()['echo-private:App.Models.Admin.'.$admin->id.',.database-notifications.sent']);
+
         app(ContactService::class)->storeContact([
             'name' => 'Sender', 'email' => 'sender@example.test',
             'subject' => 'Question', 'message' => 'Please help.',

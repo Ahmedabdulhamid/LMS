@@ -45,7 +45,7 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::Amber,
             ])
             ->defaultThemeMode(ThemeMode::Dark)
-            ->databaseNotifications()
+            ->databaseNotifications(livewireComponent: \App\Livewire\AdminDatabaseNotifications::class)
             ->databaseNotificationsPolling(null)
 
 
