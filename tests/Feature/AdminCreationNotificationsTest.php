@@ -3,15 +3,16 @@
 namespace Tests\Feature;
 
 use App\Events\OrderCreated;
+use App\Events\ContactCreated;
 use App\Events\SubscriptionCreated;
-use App\Listeners\SendOrderNotification;
-use App\Listeners\SendSubscriptionNotification;
 use App\Models\Admin;
+use App\Models\Contact;
 use App\Models\Order;
 use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
 use App\Models\User;
 use App\Notifications\OrderCreatedNotification;
+use App\Notifications\ContactBroadcastNotification;
 use App\Notifications\SubscriptionCreatedNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
@@ -34,9 +35,10 @@ class AdminCreationNotificationsTest extends TestCase
         $order->number = 'ORD-TEST';
         $order->setRelation('user', $student);
 
-        app(SendOrderNotification::class)->handle(new OrderCreated($order));
+        OrderCreated::dispatch($order);
 
         Notification::assertSentTo($admins, OrderCreatedNotification::class);
+        Notification::assertCount($admins->count());
         $payload = (new OrderCreatedNotification($order))->toDatabase($admins->first());
         $this->assertSame('filament', $payload['format']);
         $this->assertStringContainsString('ORD-TEST', $payload['title']);
@@ -53,13 +55,33 @@ class AdminCreationNotificationsTest extends TestCase
         $subscription->setRelation('user', $student);
         $subscription->setRelation('plan', $plan);
 
-        app(SendSubscriptionNotification::class)->handle(new SubscriptionCreated($subscription));
+        SubscriptionCreated::dispatch($subscription);
 
         Notification::assertSentTo($admins, SubscriptionCreatedNotification::class);
+        Notification::assertCount($admins->count());
         $payload = (new SubscriptionCreatedNotification($subscription))->toDatabase($admins->first());
         $this->assertSame('filament', $payload['format']);
         $this->assertStringContainsString('Subscribed Student', $payload['body']);
         $this->assertStringContainsString('Gold Plan', $payload['body']);
+    }
+
+    public function test_contact_created_sends_exactly_one_notification_per_admin(): void
+    {
+        Notification::fake();
+        $admins = $this->admins();
+        $contact = new Contact([
+            'name' => 'Test Contact',
+            'email' => 'contact@example.test',
+            'subject' => 'Test message',
+            'message' => 'Please help with my course.',
+        ]);
+
+        ContactCreated::dispatch($contact);
+
+        foreach ($admins as $admin) {
+            Notification::assertSentToTimes($admin, ContactBroadcastNotification::class, 1);
+        }
+        Notification::assertCount($admins->count());
     }
 
     private function admins()

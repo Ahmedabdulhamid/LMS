@@ -2,6 +2,26 @@
 
 A modern Laravel-based learning management system built with Filament admin tooling, Vite assets, queue-driven background processing, and cloud storage for private course media.
 
+## Shared hosting asset deployment
+
+When the domain serves the project root (`public_html`) instead of Laravel's
+`public` directory, publish Filament assets after installing PHP dependencies
+and copy them into the served root:
+
+```bash
+php artisan filament:assets
+cp -a public/js .
+cp -a public/css .
+cp public/firebase-messaging-sw.js .
+```
+
+Upload the complete locally compiled `public/build` directory to both
+`public_html/public/build` (Laravel's manifest) and `public_html/build` (browser
+assets). The Vite build does not include Filament's separately published
+JavaScript. Verify `/js/filament/support/support.js` and
+`/js/filament/notifications/notifications.js` return JavaScript with HTTP 200.
+Keep the existing root `.htaccess` protections for private application files.
+
 ## Overview
 
 This project provides a complete LMS experience for online education delivery, including course management, enrollment flows, payment handling, student progress tracking, video processing, and a Filament-powered admin backend.
