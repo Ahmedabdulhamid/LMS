@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\SubscriptionDurationUnit;
 use App\Enums\SubscriptionStatus;
+use App\Events\SubscriptionCreated;
 use App\Exceptions\InactiveSubscriptionPlanException;
 use App\Models\Order;
 use App\Models\Subscription;
@@ -32,7 +33,7 @@ class SubscriptionService
         return DB::transaction(function () use ($user, $plan, $order): Subscription {
             $startsAt = now();
 
-            return Subscription::query()->create([
+            $subscription = Subscription::query()->create([
                 'user_id' => $user->id,
                 'subscription_plan_id' => $plan->id,
                 'order_id' => $order?->id,
@@ -40,6 +41,10 @@ class SubscriptionService
                 'ends_at' => $this->calculateEndsAt($startsAt, $plan),
                 'status' => SubscriptionStatus::Pending,
             ]);
+
+            DB::afterCommit(fn () => SubscriptionCreated::dispatch($subscription));
+
+            return $subscription;
         });
     }
 

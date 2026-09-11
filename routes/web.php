@@ -4,6 +4,7 @@ use App\Http\Controllers\CourseVideoUploadController;
 use App\Http\Controllers\HomePageController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\VideoStreamController;
+use App\Http\Controllers\UserDeviceTokenController;
 use App\Livewire\CheckoutOrder;
 use App\Livewire\ContactPage;
 use App\Livewire\LearnCourse;
@@ -32,6 +33,15 @@ Route::middleware('throttle:120,1')
     ->group(function (): void {
         Route::get('/master.m3u8', 'master')->name('master');
         Route::get('/{quality}/index.m3u8', 'variant')->name('variant');
+    });
+
+Route::middleware(['auth:student', 'throttle:60,1'])
+    ->prefix('api/student/device-tokens')
+    ->name('student.device-tokens.')
+    ->controller(UserDeviceTokenController::class)
+    ->group(function (): void {
+        Route::post('/', 'store')->name('store');
+        Route::delete('/', 'destroy')->name('destroy');
     });
 
 Route::get('/locale/{locale}', function (string $locale) {

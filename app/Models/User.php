@@ -101,6 +101,15 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
         return $this->hasMany(UserVideoProgress::class);
     }
 
+    public function deviceTokens(): HasMany
+    {
+        return $this->hasMany(UserDeviceToken::class);
+    }
+    public function routeNotificationForFcm(): array
+    {
+        return $this->deviceTokens()->pluck('token')->toArray();
+    }
+
     public function enrolledCourses(): BelongsToMany
     {
         return $this->belongsToMany(Course::class, 'enrollments')

@@ -2,13 +2,11 @@
 
 namespace App\Services;
 
-use App\Models\Admin;
+use App\Events\ContactCreated;
 use App\Models\Contact;
-use App\Notifications\NewContactSubmission;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Notification;
 
 class ContactService
 {
@@ -31,16 +29,7 @@ class ContactService
 
             $this->forgetContactCache();
 
-            DB::afterCommit(function () use ($contact, $locale): void {
-                $admins = Admin::query()->get();
-
-                if ($admins->isNotEmpty()) {
-                    Notification::send(
-                        $admins,
-                        new NewContactSubmission($contact, $locale ?? app()->getLocale()),
-                    );
-                }
-            });
+            DB::afterCommit(fn () => ContactCreated::dispatch($contact));
 
             return $contact;
         });

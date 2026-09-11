@@ -1,11 +1,11 @@
-@props(['video', 'course', 'poster' => null, 'watermark' => null, 'retryable' => false, 'autoplay' => false, 'resumeAt' => 0])
+@props(['video', 'course', 'poster' => null, 'watermark' => null, 'retryable' => false, 'autoplay' => false, 'resumeAt' => 0, 'trackProgress' => false])
 
 @once
     @vite('resources/js/video-player.js')
 @endonce
 
 @if ($video->status === \App\Enums\VideoStatus::Ready && $video->hls_path)
-    <div wire:ignore dir="ltr" class="course-video-player" data-course-video-player data-video-id="{{ $video->id }}" data-resume-at="{{ (int) $resumeAt }}" data-manifest="{{ route('course-videos.stream.master', [$course, $video]) }}" data-autoplay="{{ $autoplay ? 'true' : 'false' }}">
+    <div wire:ignore dir="ltr" class="course-video-player" data-course-video-player data-video-id="{{ $video->id }}" data-resume-at="{{ (int) $resumeAt }}" data-manifest="{{ route('course-videos.stream.master', [$course, $video]) }}" data-autoplay="{{ $autoplay ? 'true' : 'false' }}" data-track-progress="{{ $trackProgress ? 'true' : 'false' }}">
         <video dir="ltr" playsinline preload="metadata" @if($poster) poster="{{ $poster }}" @endif></video>
         @if ($watermark)
             <div class="course-video-watermark">{{ $watermark }}</div>

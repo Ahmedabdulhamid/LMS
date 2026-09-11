@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="{{ app()->getLocale() }}" dir="{{ app()->isLocale('ar') ? 'rtl' : 'ltr' }}">
 <head>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="student-authenticated" content="{{ auth('student')->check() ? 'true' : 'false' }}">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $course->title ?? __('lms.wishlists.title').' · '.config('app.name') }}</title>

@@ -2,6 +2,12 @@
 
 namespace App\Providers;
 
+use App\Events\ContactCreated;
+use App\Events\OrderCreated;
+use App\Events\SubscriptionCreated;
+use App\Listeners\SendContactNotification;
+use App\Listeners\SendOrderNotification;
+use App\Listeners\SendSubscriptionNotification;
 use App\Models\Category;
 use App\Models\Course;
 use App\Models\CoursePurchase;
@@ -29,10 +35,11 @@ use App\Observers\IntendedLearnerObserver;
 use App\Observers\PaymentObserver;
 use App\Observers\ReviewObserver;
 use App\Observers\SectionObserver;
-use App\Observers\UserObserver;
 use App\Observers\UserCourseProgressObserver;
+use App\Observers\UserObserver;
 use App\Observers\VideoAttachmentObserver;
 use App\Observers\WishlistObserver;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
@@ -75,5 +82,11 @@ class AppServiceProvider extends ServiceProvider
         UserCourseProgress::observe(UserCourseProgressObserver::class);
         VideoAttachment::observe(VideoAttachmentObserver::class);
         Wishlist::observe(WishlistObserver::class);
+        Event::listen(
+            ContactCreated::class,
+            SendContactNotification::class,
+        );
+        Event::listen(OrderCreated::class, SendOrderNotification::class);
+        Event::listen(SubscriptionCreated::class, SendSubscriptionNotification::class);
     }
 }

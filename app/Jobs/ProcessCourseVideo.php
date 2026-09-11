@@ -132,6 +132,8 @@ class ProcessCourseVideo implements ShouldBeUnique, ShouldQueue
         } finally {
             File::deleteDirectory($temporaryDirectory);
         }
+
+        SendCourseVideoReadyNotification::dispatch($video->id);
     }
 
     private function safeExtension(string $key): string

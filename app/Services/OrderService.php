@@ -3,9 +3,11 @@
 namespace App\Services;
 
 use App\Enums\OrderStatus;
+use App\Events\OrderCreated;
 use App\Exceptions\AlreadyEnrolledException;
 use App\Exceptions\AlreadySubscribedException;
 use App\Exceptions\CourseNotPurchasableException;
+use App\Exceptions\InactiveSubscriptionPlanException;
 use App\Models\Course;
 use App\Models\Order;
 use App\Models\Subscription;
@@ -70,12 +72,14 @@ class OrderService
                 'unit_price' => $this->fromCents($unitPrice),
                 'discount_amount' => $this->fromCents($discountTotal),
                 'total' => $this->fromCents($total),
- 'metadata' => [
- 'course_slug' => $course->slug,
- 'instructor_id' => $course->instructor_id,
- 'locale' => app()->getLocale(),
+                'metadata' => [
+                    'course_slug' => $course->slug,
+                    'instructor_id' => $course->instructor_id,
+                    'locale' => app()->getLocale(),
                 ],
             ]);
+
+            DB::afterCommit(fn () => OrderCreated::dispatch($order));
 
             return $order->loadMissing('items');
         });
@@ -87,7 +91,7 @@ class OrderService
             $plan = SubscriptionPlan::query()->whereKey($plan->id)->lockForUpdate()->firstOrFail();
 
             if (! $plan->is_active) {
-                throw new \App\Exceptions\InactiveSubscriptionPlanException;
+                throw new InactiveSubscriptionPlanException;
             }
 
             $hasActiveSubscription = Subscription::query()
@@ -134,13 +138,15 @@ class OrderService
                 'unit_price' => $this->fromCents($total),
                 'discount_amount' => '0.00',
                 'total' => $this->fromCents($total),
- 'metadata' => [
- 'duration_value' => $plan->duration_value,
- 'duration_unit' => $plan->duration_unit->value,
- 'courses_count' => $plan->courses()->count(),
- 'locale' => app()->getLocale(),
+                'metadata' => [
+                    'duration_value' => $plan->duration_value,
+                    'duration_unit' => $plan->duration_unit->value,
+                    'courses_count' => $plan->courses()->count(),
+                    'locale' => app()->getLocale(),
                 ],
             ]);
+
+            DB::afterCommit(fn () => OrderCreated::dispatch($order));
 
             return $order->loadMissing('items');
         });

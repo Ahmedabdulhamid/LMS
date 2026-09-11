@@ -37,6 +37,7 @@
                         :watermark="auth('student')->user()?->email ?? config('app.name')"
                         :autoplay="$autoplaySelectedVideo"
                         :resume-at="($lessonProgress[$this->selectedVideo->id]['completed'] ?? false) ? 0 : ($lessonProgress[$this->selectedVideo->id]['position'] ?? 0)"
+                        track-progress
                     />
                 </div>
 

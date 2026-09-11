@@ -7,6 +7,7 @@ use App\Enums\EnrollmentStatus;
 use App\Enums\OrderStatus;
 use App\Enums\SubscriptionDurationUnit;
 use App\Enums\SubscriptionStatus;
+use App\Events\SubscriptionCreated;
 use App\Models\Course;
 use App\Models\CoursePurchase;
 use App\Models\Enrollment;
@@ -217,6 +218,8 @@ class PaymentSuccessHandler
                 'ends_at' => $endsAt,
                 'status' => SubscriptionStatus::Active,
             ]);
+
+            DB::afterCommit(fn () => SubscriptionCreated::dispatch($subscription));
 
             foreach ($plan->courses as $course) {
                 Enrollment::query()->updateOrCreate(

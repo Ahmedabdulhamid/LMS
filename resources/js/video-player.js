@@ -92,7 +92,9 @@ async function initialize(container) {
             video.currentTime = resumeAt;
         }
 
-        const progressTracker = trackProgress(container, video);
+        const progressTracker = container.dataset.trackProgress === 'true'
+            ? trackProgress(container, video)
+            : null;
         players.set(container, { player, overlay, progressTracker });
 
         if (container.dataset.autoplay === 'true') {
