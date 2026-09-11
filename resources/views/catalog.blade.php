@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
 <head>
+    @include('partials.application-icons')
     <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ config('app.name', 'EduPath') }}</title>
+    <title>{{ app(\App\Services\SettingService::class)->name() }}</title>
     @vite(['resources/css/app.css', 'resources/css/home.css', 'resources/css/catalog.css', 'resources/js/app.js'])
 </head>
 <body>
@@ -14,7 +15,7 @@
     $imageUrl = static function (?string $path): ?string { if (blank($path)) return null; try { return \Illuminate\Support\Facades\Storage::disk(config('lms-upload.disk'))->url($path); } catch (\Throwable) { return null; } };
     $duration = static function ($seconds) use ($ar): string { $hours = max(1, (int) ceil(((float) $seconds) / 3600)); return $ar ? $hours.' ساعة' : $hours.' hours'; };
 @endphp
-<header class="header"><div class="container nav"><a class="brand" href="{{ route('home') }}"><img src="{{ asset('images/learning-platform-logo.png') }}" alt=""><b>{{ config('app.name', 'EduPath') }}</b></a><nav><a href="{{ route('home') }}">{{ $ar ? 'الرئيسية' : 'Home' }}</a><a href="{{ route('categories.index') }}">{{ $ar ? 'التصنيفات' : 'Categories' }}</a><a href="{{ route('courses.latest') }}">{{ $ar ? 'الكورسات' : 'Courses' }}</a><a href="{{ route('contact.index') }}">{{ $ar ? 'تواصل معنا' : 'Contact' }}</a></nav><div class="nav-actions"><a class="lang" href="{{ route('locale.switch', $ar ? 'en' : 'ar') }}">{{ $ar ? 'EN' : 'ع' }}</a><a class="login" href="{{ route('filament.students.auth.login') }}">{{ $ar ? 'دخول' : 'Sign in' }}</a><a class="btn small" href="{{ route('filament.students.auth.register') }}">{{ $ar ? 'ابدأ الآن' : 'Get started' }}</a></div></div></header>
+<header class="header"><div class="container nav"><a class="brand" href="{{ route('home') }}"><img src="{{ app(\App\Services\SettingService::class)->logoUrl() }}" alt=""><b>{{ app(\App\Services\SettingService::class)->name() }}</b></a><nav><a href="{{ route('home') }}">{{ $ar ? 'الرئيسية' : 'Home' }}</a><a href="{{ route('categories.index') }}">{{ $ar ? 'التصنيفات' : 'Categories' }}</a><a href="{{ route('courses.latest') }}">{{ $ar ? 'الكورسات' : 'Courses' }}</a><a href="{{ route('contact.index') }}">{{ $ar ? 'تواصل معنا' : 'Contact' }}</a></nav><div class="nav-actions"><a class="lang" href="{{ route('locale.switch', $ar ? 'en' : 'ar') }}">{{ $ar ? 'EN' : 'ع' }}</a><a class="login" href="{{ route('filament.students.auth.login') }}">{{ $ar ? 'دخول' : 'Sign in' }}</a><a class="btn small" href="{{ route('filament.students.auth.register') }}">{{ $ar ? 'ابدأ الآن' : 'Get started' }}</a></div></div></header>
 <main>
     <section class="catalog-hero"><div class="container"><span>{{ $eyebrow }}</span><h1>{{ $title }}</h1><p>{{ $ar ? 'استكشف كل الخيارات المتاحة واختر خطوتك القادمة بثقة.' : 'Explore every available option and choose your next step with confidence.' }}</p></div></section>
     <section class="section catalog-content"><div class="container">
@@ -25,5 +26,5 @@
         @endif
     </div></section>
 </main>
-<footer><div class="container footer"><a class="brand" href="{{ route('home') }}"><img src="{{ asset('images/learning-platform-logo.png') }}" alt=""><b>{{ config('app.name','EduPath') }}</b></a><p>© {{ date('Y') }} {{ config('app.name','EduPath') }}</p><div><a href="{{ route('home') }}">{{ $ar ? 'الرئيسية' : 'Home' }}</a></div></div></footer>
+<footer><div class="container footer"><a class="brand" href="{{ route('home') }}"><img src="{{ app(\App\Services\SettingService::class)->logoUrl() }}" alt=""><b>{{ app(\App\Services\SettingService::class)->name() }}</b></a><p>© {{ date('Y') }} {{ app(\App\Services\SettingService::class)->name() }}</p><div><a href="{{ route('home') }}">{{ $ar ? 'الرئيسية' : 'Home' }}</a></div></div></footer>
 </body></html>

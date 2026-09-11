@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="{{ app()->getLocale() }}" dir="{{ app()->isLocale('ar') ? 'rtl' : 'ltr' }}">
 <head>
+    @include('partials.application-icons')
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ __('Payment status') }} - {{ config('app.name', 'Laravel') }}</title>
+    <title>{{ __('Payment status') }} - {{ app(\App\Services\SettingService::class)->name() }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         body {
@@ -127,8 +128,8 @@
 <body>
     <main class="payment-card">
         <div class="brand">
-            <img src="{{ asset('images/learning-platform-logo.png') }}" alt="{{ config('app.name', 'Laravel') }}">
-            <strong>{{ config('app.name', 'Laravel') }}</strong>
+            <img src="{{ app(\App\Services\SettingService::class)->logoUrl() }}" alt="{{ app(\App\Services\SettingService::class)->name() }}">
+            <strong>{{ app(\App\Services\SettingService::class)->name() }}</strong>
         </div>
 
         @php

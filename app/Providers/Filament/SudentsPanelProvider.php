@@ -2,27 +2,25 @@
 
 namespace App\Providers\Filament;
 
-use App\Filament\Sudents\Pages\Auth\EditProfile;
+use App\Filament\Student\Pages\Dashboard;
+use App\Filament\Student\Pages\Profile;
+use App\Filament\Student\Resources\CourseResource;
+use App\Filament\Student\Resources\PaymentResource;
 use App\Filament\Sudents\Pages\Auth\Register;
 use App\Http\Middleware\AuthenticatePanelSession;
 use App\Http\Middleware\EnsurePanelUserType;
 use App\Http\Middleware\SetLocale;
+use App\Services\SettingService;
 use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use App\Filament\Student\Pages\Dashboard;
-use App\Filament\Student\Pages\Profile;
-use App\Filament\Student\Resources\CourseResource;
-use App\Filament\Student\Resources\PaymentResource;
+use Filament\Navigation\NavigationItem;
 use Filament\Panel;
 use Filament\PanelProvider;
-use Filament\Navigation\NavigationItem;
 use Filament\Support\Colors\Color;
 use Filament\View\PanelsRenderHook;
-use Filament\Widgets\AccountWidget;
-use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -40,14 +38,16 @@ class SudentsPanelProvider extends PanelProvider
             ->viteTheme('resources/css/filament/students/theme.css')
             ->login()
             ->registration(Register::class)
-             ->passwordReset()
+            ->passwordReset()
             ->emailVerification()
             ->profile(Profile::class, isSimple: false)
             ->authGuard('student')
             ->darkMode()
             ->userMenu()
-            ->brandLogo(asset('images/learning-platform-logo.png'))
-            ->darkModeBrandLogo(asset('images/learning-platform-logo.png'))
+            ->brandName(fn () => app(SettingService::class)->name())
+            ->favicon(fn () => app(SettingService::class)->faviconUrl())
+            ->brandLogo(fn () => app(SettingService::class)->logoUrl())
+            ->darkModeBrandLogo(fn () => app(SettingService::class)->logoUrl())
             ->brandLogoHeight('3rem')
             ->colors([
                 'primary' => Color::Amber,
@@ -74,7 +74,7 @@ class SudentsPanelProvider extends PanelProvider
                 StartSession::class,
                 SetLocale::class,
                 AuthenticatePanelSession::class,
-                //AuthenticateSession::class,
+                // AuthenticateSession::class,
                 ShareErrorsFromSession::class,
                 PreventRequestForgery::class,
                 SubstituteBindings::class,

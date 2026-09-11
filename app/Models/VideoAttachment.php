@@ -13,7 +13,7 @@ class VideoAttachment extends Model
     protected static function booted(): void
     {
         static::deleting(function (VideoAttachment $attachment) {
-            $disk = config('filesystems.uploads', 'r2');
+            $disk = config('lms-upload.disk');
 
             if ($attachment->file_path && Storage::disk($disk)->exists($attachment->file_path)) {
                 Storage::disk($disk)->delete($attachment->file_path);

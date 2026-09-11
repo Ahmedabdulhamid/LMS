@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
 <head>
+    @include('partials.application-icons')
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Learn practical skills from expert instructors through focused, flexible online courses.">
-    <title>{{ config('app.name', 'EduPath') }} — Learn without limits</title>
+    <title>{{ app(\App\Services\SettingService::class)->name() }} — Learn without limits</title>
     @vite(['resources/css/app.css', 'resources/css/home.css', 'resources/css/catalog.css', 'resources/js/app.js'])
 </head>
 <body>
@@ -23,7 +24,7 @@
 
 <header class="header" id="top">
     <div class="container nav">
-        <a class="brand" href="#top"><img src="{{ asset('images/learning-platform-logo.png') }}" alt=""><b>{{ config('app.name', 'EduPath') }}</b></a>
+        <a class="brand" href="#top"><img src="{{ app(\App\Services\SettingService::class)->logoUrl() }}" alt=""><b>{{ app(\App\Services\SettingService::class)->name() }}</b></a>
         <nav>
             <a href="#categories">{{ $ar ? 'التصنيفات' : 'Categories' }}</a>
             <a href="#courses">{{ $ar ? 'الكورسات' : 'Courses' }}</a>
@@ -68,7 +69,7 @@
             <div class="hero-art reveal">
                 <div class="halo"></div>
                 <div class="hero-orbit orbit-one">✦</div><div class="hero-orbit orbit-two">01</div>
-                <img src="{{ asset('images/learning-platform-logo.png') }}" alt="{{ config('app.name') }}">
+                <img src="{{ app(\App\Services\SettingService::class)->logoUrl() }}" alt="{{ app(\App\Services\SettingService::class)->name() }}">
                 <aside class="float progress"><i>↗</i><p><small>{{ $ar ? 'تقدمك الأسبوعي' : 'Weekly progress' }}</small><b>84%</b><span><u></u></span></p></aside>
                 <aside class="float lesson"><i>▶</i><p><small>{{ $ar ? 'جاهز للمشاهدة' : 'Ready to watch' }}</small><b>{{ $ar ? 'درسك القادم' : 'Your next lesson' }}</b></p></aside>
                 <div class="badge">✓ {{ $ar ? 'تعلّم بلا حدود' : 'Learn without limits' }}</div>
@@ -141,7 +142,7 @@
                         <footer><span>{{ mb_substr($review['user']['name'] ?? 'L', 0, 1) }}</span><div><b>{{ $review['user']['name'] ?? ($ar ? 'طالب بالمنصة' : 'Platform learner') }}</b><small>{{ $review['course']['title'] ?? '' }}</small></div></footer>
                     </article>
                 @empty
-                    <article class="review-card reveal"><div class="review-stars">★★★★★</div><blockquote>“{{ $ar ? 'منصة تجعل التعلم واضحًا، ممتعًا، وقابلًا للتطبيق.' : 'A platform that makes learning clear, engaging, and immediately useful.' }}”</blockquote><footer><span>L</span><div><b>{{ $ar ? 'أحد طلابنا' : 'One of our learners' }}</b><small>{{ config('app.name') }}</small></div></footer></article>
+                    <article class="review-card reveal"><div class="review-stars">★★★★★</div><blockquote>“{{ $ar ? 'منصة تجعل التعلم واضحًا، ممتعًا، وقابلًا للتطبيق.' : 'A platform that makes learning clear, engaging, and immediately useful.' }}”</blockquote><footer><span>L</span><div><b>{{ $ar ? 'أحد طلابنا' : 'One of our learners' }}</b><small>{{ app(\App\Services\SettingService::class)->name() }}</small></div></footer></article>
                 @endforelse
             </div>
         </div>
@@ -150,6 +151,6 @@
     <section class="cta"><div class="container cta-card reveal"><div><span>{{ $ar ? 'هذه لحظتك' : 'THIS IS YOUR MOMENT' }}</span><h2>{{ $ar ? 'ابدأ صغيرًا. وصل بعيدًا.' : 'Start small. Go remarkably far.' }}</h2><p>{{ $ar ? 'حساب واحد يفتح لك عالمًا كاملًا من المعرفة.' : 'One account opens a whole world of practical knowledge.' }}</p></div><aside><a class="btn white" href="{{ route('filament.students.auth.login') }}">{{ $ar ? 'انضم كطالب' : 'Join as a learner' }}</a><a class="btn clear" href="/instructors/register">{{ $ar ? 'انضم كمدرس' : 'Become an instructor' }}</a></aside></div></section>
 </main>
 
-<footer><div class="container footer"><a class="brand" href="#top"><img src="{{ asset('images/learning-platform-logo.png') }}" alt=""><b>{{ config('app.name','EduPath') }}</b></a><p>© {{ date('Y') }} {{ config('app.name','EduPath') }}. {{ $ar ? 'جميع الحقوق محفوظة.' : 'All rights reserved.' }}</p><div><a href="/students/login">{{ $ar ? 'دخول الطالب' : 'Student login' }}</a><a href="/instructors/login">{{ $ar ? 'دخول المدرس' : 'Instructor login' }}</a></div></div></footer>
+<footer><div class="container footer"><a class="brand" href="#top"><img src="{{ app(\App\Services\SettingService::class)->logoUrl() }}" alt=""><b>{{ app(\App\Services\SettingService::class)->name() }}</b></a><p>© {{ date('Y') }} {{ app(\App\Services\SettingService::class)->name() }}. {{ $ar ? 'جميع الحقوق محفوظة.' : 'All rights reserved.' }}</p><div><a href="/students/login">{{ $ar ? 'دخول الطالب' : 'Student login' }}</a><a href="/instructors/login">{{ $ar ? 'دخول المدرس' : 'Instructor login' }}</a></div></div></footer>
 </body>
 </html>

@@ -2,7 +2,7 @@
 
 return [
 
-    'uploads' => env('UPLOADS_DISK', 'r2'),
+    'uploads' => 'r2_private',
 
     /*
     |--------------------------------------------------------------------------
@@ -61,14 +61,25 @@ return [
             'throw' => false,
             'report' => false,
         ],
-        'r2' => [
+        'r2_public' => [
             'driver' => 's3',
-            'key' => env('R2_ACCESS_KEY_ID', env('CLOUDFLARE_R2_ACCESS_KEY_ID')),
-            'secret' => env('R2_SECRET_ACCESS_KEY', env('CLOUDFLARE_R2_SECRET_ACCESS_KEY')),
-            'region' => env('R2_REGION', 'auto'),
-            'bucket' => env('R2_BUCKET', env('CLOUDFLARE_R2_BUCKET')),
-            'url' => env('R2_URL', env('CLOUDFLARE_R2_URL')),
-            'endpoint' => env('R2_ENDPOINT', env('CLOUDFLARE_R2_ENDPOINT')),
+            'key' => env('R2_PUBLIC_ACCESS_KEY_ID'),
+            'secret' => env('R2_PUBLIC_SECRET_ACCESS_KEY'),
+            'region' => env('R2_PUBLIC_REGION', 'auto'),
+            'bucket' => env('R2_PUBLIC_BUCKET'),
+            'url' => env('R2_PUBLIC_URL'),
+            'endpoint' => env('R2_PUBLIC_ENDPOINT'),
+            'use_path_style_endpoint' => false,
+            'throw' => true,
+            'report' => true,
+        ],
+        'r2_private' => [
+            'driver' => 's3',
+            'key' => env('R2_PRIVATE_ACCESS_KEY_ID'),
+            'secret' => env('R2_PRIVATE_SECRET_ACCESS_KEY'),
+            'region' => env('R2_PRIVATE_REGION', 'auto'),
+            'bucket' => env('R2_PRIVATE_BUCKET'),
+            'endpoint' => env('R2_PRIVATE_ENDPOINT'),
             'use_path_style_endpoint' => false,
             'throw' => true,
             'report' => true,

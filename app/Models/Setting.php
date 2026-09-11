@@ -6,14 +6,19 @@ use App\Services\SettingService;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 
-
 #[Fillable(['group', 'key', 'value', 'type', 'is_public', 'is_encrypted'])]
 class Setting extends Model
 {
     protected static function booted(): void
     {
-        static::saved(fn () => app(SettingService::class)->flushCache());
-        static::deleted(fn () => app(SettingService::class)->flushCache());
+        $invalidate = function (Setting $setting): void {
+            app(SettingService::class)->forget();
+            if ($setting->getConnection()->transactionLevel() > 0) {
+                $setting->getConnection()->afterCommit(fn () => app(SettingService::class)->forget());
+            }
+        };
+        static::saved($invalidate);
+        static::deleted($invalidate);
     }
 
     public function casts(): array
@@ -23,5 +28,4 @@ class Setting extends Model
             'is_encrypted' => 'boolean',
         ];
     }
-
 }

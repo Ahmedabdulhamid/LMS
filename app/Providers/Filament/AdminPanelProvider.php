@@ -5,6 +5,8 @@ namespace App\Providers\Filament;
 use App\Http\Middleware\AuthenticatePanelSession;
 use App\Http\Middleware\EnsurePanelUserType;
 use App\Http\Middleware\SetLocale;
+use App\Livewire\AdminDatabaseNotifications;
+use App\Services\SettingService;
 use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -38,16 +40,17 @@ class AdminPanelProvider extends PanelProvider
             ->authGuard('admin')
             ->darkMode()
             ->userMenu()
-            ->brandLogo(asset('images/learning-platform-logo.png'))
-            ->darkModeBrandLogo(asset('images/learning-platform-logo.png'))
+            ->brandName(fn () => app(SettingService::class)->name())
+            ->favicon(fn () => app(SettingService::class)->faviconUrl())
+            ->brandLogo(fn () => app(SettingService::class)->logoUrl())
+            ->darkModeBrandLogo(fn () => app(SettingService::class)->logoUrl())
             ->brandLogoHeight('3rem')
             ->colors([
                 'primary' => Color::Amber,
             ])
             ->defaultThemeMode(ThemeMode::Dark)
-            ->databaseNotifications(livewireComponent: \App\Livewire\AdminDatabaseNotifications::class)
+            ->databaseNotifications(livewireComponent: AdminDatabaseNotifications::class)
             ->databaseNotificationsPolling(null)
-
 
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
@@ -65,7 +68,7 @@ class AdminPanelProvider extends PanelProvider
                 StartSession::class,
                 SetLocale::class,
                 AuthenticatePanelSession::class,
-                //AuthenticateSession::class,
+                // AuthenticateSession::class,
                 ShareErrorsFromSession::class,
                 PreventRequestForgery::class,
                 SubstituteBindings::class,

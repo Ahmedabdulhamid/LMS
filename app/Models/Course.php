@@ -141,6 +141,7 @@ class Course extends Model
         });
 
         static::deleting(function (Course $course) {
+            $course->sections()->get()->each->delete();
             Cache::forget("course_{$course->id}");
         });
     }

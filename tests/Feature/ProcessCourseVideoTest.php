@@ -13,6 +13,7 @@ use App\Services\VideoMetadataService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Mockery\MockInterface;
 use RuntimeException;
 use Tests\TestCase;
@@ -59,6 +60,45 @@ class ProcessCourseVideoTest extends TestCase
         self::assertSame('ready', $video->processing_stage);
         self::assertSame(100, $video->processing_progress);
         self::assertNotNull($video->processed_at);
+    }
+
+    public function test_deletion_during_upload_cleans_late_hls_files(): void
+    {
+        $video = $this->video();
+        Storage::fake('r2_private');
+        $segment = "courses/{$video->section->course_id}/videos/{$video->id}/hls/720p/segment_00001.ts";
+        $storage = $this->mock(R2FileService::class, function (MockInterface $mock) use ($video, $segment): void {
+            $mock->shouldReceive('readStream')->once()->andReturnUsing(function () {
+                $stream = fopen('php://temp', 'w+b');
+                fwrite($stream, 'video');
+                rewind($stream);
+
+                return $stream;
+            });
+            $mock->shouldReceive('uploadHlsDirectory')->once()->andReturnUsing(function () use ($video, $segment): void {
+                DB::table('course_videos')->where('id', $video->id)->delete();
+                Storage::disk('r2_private')->put($segment, 'late upload');
+            });
+        });
+        $metadata = $this->mock(VideoMetadataService::class, fn (MockInterface $mock) => $mock->shouldReceive('probe')->once()->andReturn([
+            'duration' => 331, 'width' => 1280, 'height' => 720,
+        ]));
+        $transcoder = $this->mock(HlsVideoTranscoder::class, function (MockInterface $mock): void {
+            $mock->shouldReceive('transcode')->once()->andReturnUsing(function (string $input, string $output): array {
+                File::ensureDirectoryExists($output.'/720p');
+                File::put($output.'/master.m3u8', "#EXTM3U\n720p/index.m3u8\n");
+                File::put($output.'/720p/index.m3u8', "#EXTM3U\nsegment_00001.ts\n");
+                File::put($output.'/720p/segment_00001.ts', 'segment');
+
+                return [720];
+            });
+        });
+        $duration = $this->mock(CalcalateCourseDurationService::class, fn (MockInterface $mock) => $mock->shouldNotReceive('calculateCourseDuration'));
+
+        (new ProcessCourseVideo($video->id))->handle($storage, $metadata, $transcoder, $duration);
+
+        Storage::disk('r2_private')->assertMissing($segment);
+        $this->assertDatabaseMissing('course_videos', ['id' => $video->id]);
     }
 
     public function test_failed_processing_stores_safe_failure_state(): void

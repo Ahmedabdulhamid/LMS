@@ -43,8 +43,8 @@ class R2VideoUploadService
         );
 
         $partSize = $this->partSizeFor($data['file_size']);
-        $result = $this->client()->createMultipartUpload([
-            'Bucket' => $this->bucket(),
+        $result = $this->client($key)->createMultipartUpload([
+            'Bucket' => $this->bucket($key),
             'Key' => $key,
             'ContentType' => $data['content_type'],
             'Metadata' => [
@@ -71,14 +71,14 @@ class R2VideoUploadService
     ): array {
         $this->ensureOwnedKey($key, $instructorId, $courseId);
 
-        $command = $this->client()->getCommand('UploadPart', [
-            'Bucket' => $this->bucket(),
+        $command = $this->client($key)->getCommand('UploadPart', [
+            'Bucket' => $this->bucket($key),
             'Key' => $key,
             'UploadId' => $uploadId,
             'PartNumber' => $partNumber,
         ]);
 
-        $request = $this->client()->createPresignedRequest(
+        $request = $this->client($key)->createPresignedRequest(
             $command,
             sprintf('+%d minutes', self::URL_EXPIRY_MINUTES),
         );
@@ -101,8 +101,8 @@ class R2VideoUploadService
 
         usort($parts, fn (array $left, array $right) => $left['part_number'] <=> $right['part_number']);
 
-        $result = $this->client()->completeMultipartUpload([
-            'Bucket' => $this->bucket(),
+        $result = $this->client($key)->completeMultipartUpload([
+            'Bucket' => $this->bucket($key),
             'Key' => $key,
             'UploadId' => $uploadId,
             'MultipartUpload' => [
@@ -127,8 +127,8 @@ class R2VideoUploadService
     ): void {
         $this->ensureOwnedKey($key, $instructorId, $courseId);
 
-        $this->client()->abortMultipartUpload([
-            'Bucket' => $this->bucket(),
+        $this->client($key)->abortMultipartUpload([
+            'Bucket' => $this->bucket($key),
             'Key' => $key,
             'UploadId' => $uploadId,
         ]);
@@ -140,7 +140,7 @@ class R2VideoUploadService
             return;
         }
 
-        Storage::disk($this->disk())->delete($key);
+        Storage::disk($this->disk($key))->delete($key);
     }
 
     private function ensureOwnedKey(string $key, int $instructorId, int $courseId): void
@@ -165,17 +165,17 @@ class R2VideoUploadService
         return $partSize;
     }
 
-    private function client(): S3Client
+    private function client(string $key): S3Client
     {
         /** @var S3Client $client */
-        $client = Storage::disk($this->disk())->getClient();
+        $client = Storage::disk($this->disk($key))->getClient();
 
         return $client;
     }
 
-    private function bucket(): string
+    private function bucket(string $key): string
     {
-        $bucket = config(sprintf('filesystems.disks.%s.bucket', $this->disk()));
+        $bucket = config(sprintf('filesystems.disks.%s.bucket', $this->disk($key)));
 
         if (! is_string($bucket) || $bucket === '') {
             throw new RuntimeException('The R2 bucket is not configured.');
@@ -184,8 +184,10 @@ class R2VideoUploadService
         return $bucket;
     }
 
-    private function disk(): string
+    private function disk(string $key): string
     {
-        return config('filesystems.uploads', 'r2');
+        return str_contains($key, '/attachments/')
+            ? config('lms-upload.disk')
+            : config('filesystems.uploads', 'r2_private');
     }
 }

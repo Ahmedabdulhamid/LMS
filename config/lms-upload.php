@@ -1,6 +1,6 @@
 <?php
 
 return [
-    'disk' => 'r2',
+    'disk' => 'r2_public',
     'directory' => 'admins',
 ];

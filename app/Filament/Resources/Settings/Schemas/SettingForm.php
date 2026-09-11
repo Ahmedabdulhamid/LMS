@@ -2,20 +2,19 @@
 
 namespace App\Filament\Resources\Settings\Schemas;
 
-use Filament\Schemas\Schema;
-
 use App\Enums\SettingGroup;
 use App\Enums\SettingType;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Schema;
 
 class SettingForm
 {
@@ -100,8 +99,7 @@ class SettingForm
                                     ->default(false)
                                     ->live()
                                     ->disabled(
-                                        fn (Get $get): bool =>
-                                            (bool) $get('is_encrypted')
+                                        fn (Get $get): bool => (bool) $get('is_encrypted')
                                     )
                                     ->afterStateHydrated(
                                         function (
@@ -124,8 +122,7 @@ class SettingForm
                                         fn (
                                             mixed $state,
                                             Get $get
-                                        ): bool =>
-                                            $get('is_encrypted')
+                                        ): bool => $get('is_encrypted')
                                                 ? false
                                                 : (bool) $state
                                     )
@@ -203,8 +200,7 @@ class SettingForm
                     ->autocomplete(false)
                     ->maxLength(65535)
                     ->required(
-                        fn (string $operation): bool =>
-                            $operation === 'create'
+                        fn (string $operation): bool => $operation === 'create'
                     )
                     ->helperText(
                         __('lms.settings.help.secret')
@@ -244,8 +240,7 @@ class SettingForm
                         }
                     )
                     ->dehydrateStateUsing(
-                        fn (mixed $state): string =>
-                            $state ? '1' : '0'
+                        fn (mixed $state): string => $state ? '1' : '0'
                     )
                     ->helperText(
                         __('lms.settings.help.boolean')
@@ -303,13 +298,12 @@ class SettingForm
                         }
                     )
                     ->dehydrateStateUsing(
-                        fn (?array $state): string =>
-                            json_encode(
-                                $state ?? [],
-                                JSON_UNESCAPED_UNICODE
-                                | JSON_UNESCAPED_SLASHES
-                                | JSON_THROW_ON_ERROR
-                            )
+                        fn (?array $state): string => json_encode(
+                            $state ?? [],
+                            JSON_UNESCAPED_UNICODE
+                            | JSON_UNESCAPED_SLASHES
+                            | JSON_THROW_ON_ERROR
+                        )
                     )
                     ->columnSpanFull(),
             ],
@@ -323,10 +317,12 @@ class SettingForm
             SettingType::File->value => [
                 FileUpload::make('value')
                     ->label(__('lms.settings.fields.file'))
-                    ->disk('public')
+                    ->disk(config('lms-upload.disk'))
                     ->directory('settings')
                     ->visibility('public')
-                    ->preserveFilenames()
+                    ->acceptedFileTypes(fn (Get $get): array => in_array($get('key'), ['website_logo', 'website_icon', 'favicon'], true)
+                        ? ['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/x-icon', 'image/vnd.microsoft.icon']
+                        : [])
                     ->downloadable()
                     ->openable()
                     ->maxSize(5120)
@@ -353,4 +349,3 @@ class SettingForm
         };
     }
 }
-

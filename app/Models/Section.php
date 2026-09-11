@@ -10,6 +10,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable(['course_id', 'title', 'order'])]
 class Section extends Model
 {
+    protected static function booted(): void
+    {
+        static::deleting(function (Section $section): void {
+            $section->videos()->get()->each->delete();
+        });
+    }
+
     public function course(): BelongsTo
     {
         return $this->belongsTo(Course::class);

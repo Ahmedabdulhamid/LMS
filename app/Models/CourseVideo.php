@@ -24,6 +24,14 @@ class CourseVideo extends Model
         'is_published' => 'boolean',
     ];
 
+    protected static function booted(): void
+    {
+        static::deleting(function (CourseVideo $video): void {
+            // Retain storage ownership and attachment keys before database cascades.
+            $video->loadMissing(['section', 'attachments']);
+        });
+    }
+
     public function section(): BelongsTo
     {
         return $this->belongsTo(Section::class);

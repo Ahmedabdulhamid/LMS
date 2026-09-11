@@ -25,11 +25,11 @@ class R2FileService
             throw new InvalidArgumentException('Invalid R2 file key.');
         }
 
-        $baseUrl = config('filesystems.disks.'.$this->disk().'.url');
+        $baseUrl = config('filesystems.disks.'.config('lms-upload.disk').'.url');
 
         return filled($baseUrl)
             ? rtrim($baseUrl, '/').'/'.ltrim($key, '/')
-            : Storage::disk($this->disk())->url($key);
+            : Storage::disk(config('lms-upload.disk'))->url($key);
     }
 
     public function temporaryUrl(string $key, int $minutes = 30): string
@@ -136,7 +136,7 @@ class R2FileService
 
     private function disk(): string
     {
-        return config('filesystems.uploads', 'r2');
+        return config('filesystems.uploads', 'r2_private');
     }
 
     private function bucket(): string

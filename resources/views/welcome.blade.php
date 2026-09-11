@@ -2,10 +2,11 @@
 <html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
 
 <head>
+    @include('partials.application-icons')
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="منصة تعليمية تجمع الطلاب بأفضل المدرّسين في تجربة تعلم مرنة وعملية.">
-    <title>{{ config('app.name', 'EduPath') }} | ابدأ رحلة تعلمك</title>
+    <title>{{ app(\App\Services\SettingService::class)->name() }} | ابدأ رحلة تعلمك</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
@@ -13,8 +14,8 @@
     @php($ar = app()->getLocale() === 'ar')
     <header class="header" id="top">
         <div class="container nav">
-            <a class="brand" href="#top"><img src="{{ asset('images/learning-platform-logo.png') }}" alt=""><b>{{
-                    config('app.name', 'EduPath') }}</b></a>
+            <a class="brand" href="#top"><img src="{{ app(\App\Services\SettingService::class)->logoUrl() }}" alt=""><b>{{
+                    app(\App\Services\SettingService::class)->name() }}</b></a>
             <nav><a href="#features">{{ $ar?'المميزات':'Features' }}</a><a href="#paths">{{ $ar?'مسارات
                     التعلم':'Learning paths' }}</a><a href="#steps">{{ $ar?'كيف تبدأ؟':'How it works' }}</a></nav>
             <div class="nav-actions"><a class="lang" href="{{ route('locale.switch',$ar?'en':'ar') }}">{{ $ar?'EN':'ع'
@@ -48,7 +49,7 @@
                     </div>
                 </div>
                 <div class="hero-art reveal">
-                    <div class="halo"></div><img src="{{ asset('images/learning-platform-logo.png') }}"
+                    <div class="halo"></div><img src="{{ app(\App\Services\SettingService::class)->logoUrl() }}"
                         alt="{{ $ar?'كتاب مفتوح':'Open learning book' }}">
                     <aside class="float progress"><i>▤</i>
                         <p><small>{{ $ar?'تقدّمك الأسبوعي':'Weekly progress' }}</small><b>78%</b><span><u></u></span>
@@ -154,9 +155,9 @@
     </main>
     <footer>
         <div class="container footer"><a class="brand" href="#top"><img
-                    src="{{ asset('images/learning-platform-logo.png') }}" alt=""><b>{{ config('app.name','EduPath')
+                    src="{{ app(\App\Services\SettingService::class)->logoUrl() }}" alt=""><b>{{ app(\App\Services\SettingService::class)->name()
                     }}</b></a>
-            <p>© {{ date('Y') }} {{ config('app.name','EduPath') }}. {{ $ar?'جميع الحقوق محفوظة.':'All rights reserved.'
+            <p>© {{ date('Y') }} {{ app(\App\Services\SettingService::class)->name() }}. {{ $ar?'جميع الحقوق محفوظة.':'All rights reserved.'
                 }}</p>
             <div><a href="/students/login">{{ $ar?'دخول الطالب':'Student login' }}</a><a href="/instructors/login">{{
                     $ar?'دخول المدرّس':'Instructor login' }}</a></div>

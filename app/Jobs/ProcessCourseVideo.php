@@ -13,6 +13,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 use Throwable;
 
@@ -103,8 +104,14 @@ class ProcessCourseVideo implements ShouldBeUnique, ShouldQueue
                 },
             );
             $baseKey = sprintf('courses/%d/videos/%d/hls', $course->id, $video->id);
+            if (! CourseVideo::query()->whereKey($video->id)->exists()) {
+                return;
+            }
             $video->forceFill(['processing_stage' => 'uploading', 'processing_progress' => 92])->saveQuietly();
             $storage->uploadHlsDirectory($output, $baseKey);
+            if (! CourseVideo::query()->whereKey($video->id)->exists()) {
+                return;
+            }
 
             $video->forceFill([
                 'status' => VideoStatus::Ready,
@@ -131,6 +138,10 @@ class ProcessCourseVideo implements ShouldBeUnique, ShouldQueue
             throw $exception;
         } finally {
             File::deleteDirectory($temporaryDirectory);
+            if (! CourseVideo::query()->whereKey($video->id)->exists()) {
+                Storage::disk(config('filesystems.uploads', 'r2_private'))
+                    ->deleteDirectory(sprintf('courses/%d/videos/%d/hls', $course->id, $video->id));
+            }
         }
 
         SendCourseVideoReadyNotification::dispatch($video->id);

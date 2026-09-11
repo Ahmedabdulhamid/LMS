@@ -8,6 +8,7 @@ use App\Http\Middleware\AuthenticatePanelSession;
 use App\Http\Middleware\EnsurePanelUserType;
 use App\Http\Middleware\SetLocale;
 use App\Services\Register as ServicesRegister;
+use App\Services\SettingService;
 use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -45,8 +46,10 @@ class InstructorsPanelProvider extends PanelProvider
             ->darkMode()
             ->userMenu()
             ->defaultThemeMode(ThemeMode::Dark)
-            ->brandLogo(asset('images/learning-platform-logo.png'))
-            ->darkModeBrandLogo(asset('images/learning-platform-logo.png'))
+            ->brandName(fn () => app(SettingService::class)->name())
+            ->favicon(fn () => app(SettingService::class)->faviconUrl())
+            ->brandLogo(fn () => app(SettingService::class)->logoUrl())
+            ->darkModeBrandLogo(fn () => app(SettingService::class)->logoUrl())
             ->brandLogoHeight('3rem')
 
             ->discoverResources(in: app_path('Filament/Instructors/Resources'), for: 'App\Filament\Instructors\Resources')

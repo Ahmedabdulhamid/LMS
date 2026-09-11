@@ -21,7 +21,7 @@ class CourseVideoObserver implements ShouldHandleEventsAfterCommit
     {
         if ($video->wasChanged('url')) {
             $this->deleteStoredFile($video->getOriginal('url'));
-           $this->deleteHlsDirectory(
+            $this->deleteHlsDirectory(
                 $video->getOriginal('hls_path')
             );
             $this->dispatchDurationJob($video);
@@ -34,6 +34,16 @@ class CourseVideoObserver implements ShouldHandleEventsAfterCommit
     {
         $this->deleteStoredFile($video->url);
         $this->deleteHlsDirectory($video->hls_path);
+        if ($video->section) {
+            Storage::disk(config('filesystems.uploads', 'r2_private'))->deleteDirectory(
+                sprintf('courses/%d/videos/%d/hls', $video->section->course_id, $video->id),
+            );
+        }
+        foreach ($video->attachments as $attachment) {
+            if (filled($attachment->file_path)) {
+                Storage::disk(config('lms-upload.disk'))->delete($attachment->file_path);
+            }
+        }
         $this->forgetShowCache($video);
     }
 
@@ -61,23 +71,18 @@ class CourseVideoObserver implements ShouldHandleEventsAfterCommit
     private function deleteStoredFile(?string $path): void
     {
         if (filled($path)) {
-            Storage::disk(config('lms-upload.disk'))->delete($path);
+            Storage::disk(config('filesystems.uploads', 'r2_private'))->delete($path);
         }
     }
+
     private function deleteHlsDirectory(?string $path): void
-{
-    if (! filled($path)) {
-        return;
+    {
+        if (! filled($path) || ! preg_match('#^courses/\d+/videos/\d+/hls/master\.m3u8$#D', $path)) {
+            return;
+        }
+
+        Storage::disk(config('filesystems.uploads', 'r2_private'))->deleteDirectory(dirname($path));
     }
-
-    $disk = Storage::disk(config('lms-upload.disk'));
-
-    $files = $disk->allFiles($path);
-
-    if (! empty($files)) {
-        $disk->delete($files);
-    }
-}
 
     private function forgetShowCache(CourseVideo $video): void
     {
