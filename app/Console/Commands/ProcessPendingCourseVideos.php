@@ -3,45 +3,35 @@
 namespace App\Console\Commands;
 
 use App\Enums\VideoStatus;
-use App\Jobs\ProcessCourseVideo;
 use App\Models\CourseVideo;
-use Illuminate\Bus\UniqueLock;
+use App\Services\MuxVideoLifecycle;
 use Illuminate\Console\Command;
-use Illuminate\Contracts\Cache\Repository as CacheRepository;
 
 class ProcessPendingCourseVideos extends Command
 {
-    protected $signature = 'videos:process-pending
-        {--failed : Include failed videos}
-        {--release-locks : Release stale unique locks before dispatching}';
+    protected $signature = 'videos:process-pending {--failed : Retry failed imports} {--legacy : Include ready R2 videos without Mux}';
 
-    protected $description = 'Queue uploaded course videos that still need HLS processing';
+    protected $description = 'Queue R2 originals for Mux import or reconcile processing assets';
 
-    public function handle(): int
+    public function handle(MuxVideoLifecycle $lifecycle): int
     {
-        $statuses = [VideoStatus::Uploading, VideoStatus::Processing];
+        $statuses = ['uploading', 'processing'];
         if ($this->option('failed')) {
-            $statuses[] = VideoStatus::Failed;
+            $statuses[] = 'failed';
         }
-
-        $queued = 0;
-        CourseVideo::query()
-            ->whereNotNull('url')
-            ->whereIn('status', $statuses)
-            ->select('id')
-            ->chunkById(100, function ($videos) use (&$queued): void {
+        if ($this->option('legacy')) {
+            $statuses[] = 'ready';
+        }
+        $count = 0;
+        CourseVideo::whereNotNull('url')->where('url', '!=', '')
+            ->whereNull('mux_playback_id')->whereIn('status', $statuses)
+            ->chunkById(100, function ($videos) use ($lifecycle, &$count): void {
                 foreach ($videos as $video) {
-                    $job = new ProcessCourseVideo($video->id);
-                    if ($this->option('release-locks')) {
-                        (new UniqueLock(app(CacheRepository::class)))->release($job);
-                    }
-
-                    dispatch($job);
-                    $queued++;
+                    $lifecycle->queue($video, $video->status === VideoStatus::Failed);
+                    $count++;
                 }
             });
-
-        $this->info("Queued $queued course video(s).");
+        $this->info("Queued {$count} video(s).");
 
         return self::SUCCESS;
     }

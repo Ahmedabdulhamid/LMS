@@ -1,7 +1,4 @@
-php artisan queue:work --queue=video-processing --stop-when-empty --tries=1 --timeout=22000 -v
-
-
-
-Email:admin@nexlearn.lt
-Password:dQ;1gClb=4
-
+php artisan videos:process-pending
+php artisan videos:process-pending --failed
+php artisan queue:work --queue=video-processing --stop-when-empty --tries=3 --timeout=60
+php artisan schedule:run

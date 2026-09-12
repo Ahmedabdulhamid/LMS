@@ -119,7 +119,7 @@ class CourseForm
                     Step::make(__('instructor.courses.sections.curriculum'))
                         ->icon('heroicon-o-play-circle')
                         ->description(__('instructor.courses.help.r2_upload_hint'))
-                        ->visible(fn(?Course $record): bool => $record !== null)
+                        ->visible(fn (?Course $record): bool => $record !== null)
                         ->schema([
                             Repeater::make('sections')
                                 ->label(__('instructor.courses.sections.curriculum'))
@@ -143,12 +143,11 @@ class CourseForm
                                                 ->label(__('instructor.courses.fields.video_description'))
                                                 ->rows(3)
                                                 ->columnSpanFull(),
-                                            Hidden::make('url')
-                                                ->required(),
+                                            Hidden::make('url')->required(),
                                             ViewField::make('r2_upload')
                                                 ->label(__('instructor.courses.fields.video_file'))
                                                 ->view('filament.forms.components.r2-video-upload')
-                                                ->viewData(fn(object $livewire): array => [
+                                                ->viewData(fn (object $livewire): array => [
                                                     'uploadBaseUrl' => self::uploadBaseUrl($livewire),
                                                 ])
                                                 ->dehydrated(false)
@@ -164,13 +163,13 @@ class CourseForm
                                         ->columns(2)
                                         ->reorderable()
                                         ->collapsible()
-                                        ->itemLabel(fn(array $state): ?string => $state['title'] ?? null)
+                                        ->itemLabel(fn (array $state): ?string => $state['title'] ?? null)
                                         ->addActionLabel(__('instructor.courses.actions.add_video'))
                                         ->columnSpanFull(),
                                 ])
                                 ->reorderable()
                                 ->collapsible()
-                                ->itemLabel(fn(array $state): ?string => $state['title'] ?? null)
+                                ->itemLabel(fn (array $state): ?string => $state['title'] ?? null)
                                 ->addActionLabel(__('instructor.courses.actions.add_section'))
                                 ->columnSpanFull(),
                         ])->visibleOn('edit'),

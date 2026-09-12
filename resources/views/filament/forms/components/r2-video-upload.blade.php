@@ -17,20 +17,3 @@
         @endif
     </div>
 </x-dynamic-component>
-
-@if (false)
-<script>
-document.addEventListener('alpine:init', () => {
-    Alpine.data('courseVideoUploader', ({ baseUrl, statePath, csrfToken }) => ({
-        baseUrl, statePath, csrfToken, file: null, fileName: '', fileSize: '', uploading: false, progress: 0, status: '', error: '', partProgress: {},
-        selectFile(event) { this.file = event.target.files?.[0] ?? null; this.fileName = this.file?.name ?? ''; this.fileSize = this.file ? this.formatBytes(this.file.size) : ''; this.progress = 0; this.status = ''; this.error = ''; },
-        async upload() { if (! this.file || ! this.baseUrl || this.uploading) return; this.uploading = true; this.progress = 0; this.status = ''; this.error = ''; this.partProgress = {}; let upload = null; try { upload = await this.request('/initiate', { file_name: this.file.name, file_size: this.file.size, content_type: this.file.type || 'video/mp4' }); const parts = await this.uploadParts(upload); const result = await this.request('/complete', { key: upload.key, upload_id: upload.upload_id, parts }); this.$wire.set(`${this.statePath}.url`, result.key, false); this.progress = 100; this.status = 'Video uploaded. Its duration will be calculated after saving the course.'; } catch (error) { if (upload?.upload_id) await this.abort(upload).catch(() => {}); this.error = error.message || 'The video upload failed.'; } finally { this.uploading = false; } },
-        async uploadParts(upload) { const cursor = { value: 1 }, completed = []; const workers = Array.from({ length: Math.min(4, upload.parts_count) }, async () => { while (cursor.value <= upload.parts_count) { const partNumber = cursor.value++; const start = (partNumber - 1) * upload.part_size; const signed = await this.request('/sign-part', { key: upload.key, upload_id: upload.upload_id, part_number: partNumber }); completed.push({ part_number: partNumber, etag: await this.putPart(signed.upload_url, this.file.slice(start, Math.min(start + upload.part_size, this.file.size)), partNumber) }); } }); await Promise.all(workers); return completed.sort((left, right) => left.part_number - right.part_number); },
-        putPart(url, blob, partNumber) { return new Promise((resolve, reject) => { const xhr = new XMLHttpRequest(); xhr.open('PUT', url); xhr.addEventListener('load', () => { if (xhr.status < 200 || xhr.status >= 300) return reject(new Error(`R2 rejected part ${partNumber}.`)); const etag = xhr.getResponseHeader('ETag'); etag ? resolve(etag) : reject(new Error('R2 CORS must expose the ETag header.')); }); xhr.addEventListener('error', () => reject(new Error(`Part ${partNumber} could not be uploaded.`))); xhr.send(blob); }); },
-        abort(upload) { return this.request('/abort', { key: upload.key, upload_id: upload.upload_id }, 'DELETE'); },
-        async request(path, body, method = 'POST') { const response = await fetch(`${this.baseUrl}${path}`, { method, credentials: 'same-origin', headers: { Accept: 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': this.csrfToken }, body: JSON.stringify(body) }); if (response.status === 204) return null; const data = await response.json().catch(() => ({})); if (! response.ok) throw new Error(data.errors ? Object.values(data.errors).flat()[0] : data.message || 'The upload request failed.'); return data; },
-        formatBytes(bytes) { if (! bytes) return '0 B'; const units = ['B', 'KB', 'MB', 'GB', 'TB']; const unit = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1); return `${(bytes / (1024 ** unit)).toFixed(unit ? 2 : 0)} ${units[unit]}`; },
-    }));
-});
-</script>
-@endif

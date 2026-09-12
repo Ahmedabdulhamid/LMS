@@ -2,9 +2,10 @@
 
 use App\Http\Controllers\CourseVideoUploadController;
 use App\Http\Controllers\HomePageController;
+use App\Http\Controllers\MuxWebhookController;
 use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\VideoStreamController;
 use App\Http\Controllers\UserDeviceTokenController;
+use App\Http\Controllers\VideoStreamController;
 use App\Livewire\CheckoutOrder;
 use App\Livewire\ContactPage;
 use App\Livewire\LearnCourse;
@@ -12,6 +13,7 @@ use App\Livewire\MyCourses;
 use App\Livewire\ShowCourse;
 use App\Livewire\SubscriptionPlans;
 use App\Livewire\WishlistsPage;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:instructor', 'throttle:300,1'])
@@ -19,8 +21,8 @@ Route::middleware(['auth:instructor', 'throttle:300,1'])
     ->name('instructor.course-video-uploads.')
     ->controller(CourseVideoUploadController::class)
     ->group(function (): void {
-        Route::post('/initiate', 'initiate')->name('initiate');
         Route::post('/initiate-attachment', 'initiateAttachment')->name('initiate-attachment');
+        Route::post('/initiate', 'initiate')->name('initiate');
         Route::post('/sign-part', 'signPart')->name('sign-part');
         Route::post('/complete', 'complete')->name('complete');
         Route::delete('/abort', 'abort')->name('abort');
@@ -32,7 +34,6 @@ Route::middleware('throttle:120,1')
     ->controller(VideoStreamController::class)
     ->group(function (): void {
         Route::get('/master.m3u8', 'master')->name('master');
-        Route::get('/{quality}/index.m3u8', 'variant')->name('variant');
     });
 
 Route::middleware(['auth:student', 'throttle:60,1'])
@@ -74,3 +75,10 @@ Route::get('/courses/{course:slug}', ShowCourse::class)->name('courses.show');
 Route::get('/payment/callback', [PaymentController::class, 'callback'])
     ->middleware('auth:student')
     ->name('payment.callback');
+
+Route::get('/courses/{course}/videos/{video}/playback', [VideoStreamController::class, 'playback'])
+    ->middleware('throttle:30,1')->name('course-videos.stream.playback');
+
+Route::post('/webhooks/mux', MuxWebhookController::class)
+    ->withoutMiddleware([PreventRequestForgery::class])
+    ->name('mux.webhook');

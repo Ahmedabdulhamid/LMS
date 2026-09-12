@@ -14,7 +14,6 @@
         "laravel/framework": "^13.17",
         "laravel/tinker": "^3.0",
         "league/flysystem-aws-s3-v3": "3.25.1",
-        "php-ffmpeg/php-ffmpeg": "^1.4",
         "pusher/pusher-php-server": "^7.3",
         "spatie/laravel-sluggable": "^4.0"
     },
@@ -52,7 +51,7 @@
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",
-            "npx concurrently -c \"#93c5fd,#c4b5fd,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --queue=payments,video-processing,default --tries=5 --timeout=22000\" \"npm run dev\" --names='server,queue,vite'"
+            "npx concurrently -c \"#93c5fd,#c4b5fd,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --queue=payments,video-processing,default --tries=5 --timeout=120\" \"npm run dev\" --names='server,queue,vite'"
         ],
         "test": [
             "@php artisan config:clear --ansi @no_additional_args",

@@ -4,8 +4,8 @@ namespace App\Filament\Instructors\Resources\Courses\Pages;
 
 use App\Enums\VideoStatus;
 use App\Filament\Instructors\Resources\Courses\CourseResource;
-use App\Jobs\ProcessCourseVideo;
 use App\Models\CourseVideo;
+use App\Services\MuxVideoLifecycle;
 use App\Services\R2FileService;
 use Filament\Actions\EditAction;
 use Filament\Notifications\Notification;
@@ -21,7 +21,7 @@ class ViewCourse extends ViewRecord
     public function mount(int|string $record): void
     {
         parent::mount($record);
-        $this->record=Cache::memo()->remember("course_{$this->record->id}", now()->addMinutes(5), function () {
+        $this->record = Cache::memo()->remember("course_{$this->record->id}", now()->addMinutes(5), function () {
             return $this->record->load([
                 'instructor',
                 'category',
@@ -34,10 +34,6 @@ class ViewCourse extends ViewRecord
                 'progress.user',
             ]);
         });
-
-
-
-
 
     }
 
@@ -54,8 +50,8 @@ class ViewCourse extends ViewRecord
             ->firstOrFail();
         abort_unless($video->status === VideoStatus::Failed, 422);
 
-        $video->forceFill(['status' => VideoStatus::Processing, 'processing_error' => null])->saveQuietly();
-        ProcessCourseVideo::dispatch($video->id);
+        abort_unless((int) $this->record->instructor_id === (int) auth('instructor')->id(), 403);
+        app(MuxVideoLifecycle::class)->queue($video, true);
         Notification::make()->title(__('lms.instructor.messages.video_processing_queued'))->success()->send();
         $this->record->load('sections.videos.attachments');
     }

@@ -4,8 +4,8 @@
     @vite('resources/js/video-player.js')
 @endonce
 
-@if ($video->status === \App\Enums\VideoStatus::Ready && $video->hls_path)
-    <div wire:ignore dir="ltr" class="course-video-player" data-course-video-player data-video-id="{{ $video->id }}" data-resume-at="{{ (int) $resumeAt }}" data-manifest="{{ route('course-videos.stream.master', [$course, $video]) }}" data-autoplay="{{ $autoplay ? 'true' : 'false' }}" data-track-progress="{{ $trackProgress ? 'true' : 'false' }}">
+@if ($video->status === \App\Enums\VideoStatus::Ready && $video->mux_playback_id)
+    <div wire:ignore dir="ltr" class="course-video-player" data-course-video-player data-video-id="{{ $video->id }}" data-resume-at="{{ (int) $resumeAt }}" data-playback="{{ route('course-videos.stream.playback', [$course, $video]) }}" data-autoplay="{{ $autoplay ? 'true' : 'false' }}" data-track-progress="{{ $trackProgress ? 'true' : 'false' }}">
         <video dir="ltr" playsinline preload="metadata" @if($poster) poster="{{ $poster }}" @endif></video>
         @if ($watermark)
             <div class="course-video-watermark">{{ $watermark }}</div>
@@ -23,10 +23,8 @@
     @php
         $stageLabels = [
             'queued' => 'Waiting for the video worker',
-            'downloading' => 'Downloading the source video',
-            'probing' => 'Inspecting the video',
-            'transcoding' => 'Creating streaming qualities',
-            'uploading' => 'Uploading streaming files',
+            'uploading' => __('Uploading video'),
+            'processing' => __('Video is processing'),
         ];
         $progress = min(100, max(0, (int) $video->processing_progress));
     @endphp

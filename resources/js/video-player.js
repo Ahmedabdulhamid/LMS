@@ -70,6 +70,9 @@ async function initialize(container) {
     container.dataset.initialized = 'true';
     const video = container.querySelector('video');
     const player = new shaka.Player();
+    let refreshTimer;
+    let disposed = false;
+    const disposePlayback = () => { disposed = true; clearTimeout(refreshTimer); };
 
     try {
         await player.attach(video);
@@ -85,7 +88,34 @@ async function initialize(container) {
         player.addEventListener('error', (event) => {
             container.dataset.error = String(event.detail?.code || 'playback');
         });
-        await player.load(container.dataset.manifest);
+        const loadStream = async (refresh = false) => {
+            let source = container.dataset.manifest;
+            let expiresIn;
+            if (container.dataset.playback) {
+                const response = await fetch(container.dataset.playback, { credentials: 'same-origin', headers: { Accept: 'application/json' }, cache: 'no-store' });
+                if (!response.ok) throw new Error('Playback unavailable');
+                const data = await response.json();
+                source = data.hls;
+                expiresIn = Number(data.expires_in);
+                video.poster = data.thumbnail;
+            }
+            if (disposed) return;
+            const position = refresh ? video.currentTime : undefined;
+            const wasPlaying = !video.paused;
+            await player.load(source, position);
+            if (refresh && wasPlaying) await video.play();
+            if (expiresIn && !disposed) {
+                refreshTimer = setTimeout(async () => {
+                    try { await loadStream(true); }
+                    catch {
+                        // Stop playback if authorization has expired or cannot be renewed.
+                        await player.unload();
+                        showPlaybackError(container);
+                    }
+                }, Math.max(10, expiresIn - 60) * 1000);
+            }
+        };
+        await loadStream();
 
         const resumeAt = Number(container.dataset.resumeAt || 0);
         if (resumeAt > 0 && resumeAt < video.duration - 5) {
@@ -95,7 +125,7 @@ async function initialize(container) {
         const progressTracker = container.dataset.trackProgress === 'true'
             ? trackProgress(container, video)
             : null;
-        players.set(container, { player, overlay, progressTracker });
+        players.set(container, { player, overlay, progressTracker, disposePlayback });
 
         if (container.dataset.autoplay === 'true') {
             try {
@@ -105,6 +135,7 @@ async function initialize(container) {
             }
         }
     } catch (error) {
+        disposePlayback();
         container.dataset.error = String(error?.code || 'load');
         showPlaybackError(container);
         delete container.dataset.initialized;
@@ -135,8 +166,9 @@ const observer = new MutationObserver((mutations) => {
 
             containers.forEach((container) => {
                 const instance = players.get(container);
-                instance?.progressTracker.flush();
-                instance?.progressTracker.destroy();
+                instance?.disposePlayback?.();
+                instance?.progressTracker?.flush();
+                instance?.progressTracker?.destroy();
                 instance?.overlay.destroy();
                 instance?.player.destroy();
                 players.delete(container);

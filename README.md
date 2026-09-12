@@ -58,7 +58,7 @@ This project provides a complete LMS experience for online education delivery, i
 - Composer
 - Node.js 18+ and npm
 - SQLite for local development or MySQL for production
-- FFmpeg and FFprobe for video processing
+- Mux credentials for video processing and signed streaming
 - Optional: Redis and a queue worker environment
 
 ## Project Structure
@@ -119,7 +119,7 @@ Update your `.env` file with your local or server environment values, especially
 - `FILESYSTEM_DISK`
 - `AWS_*` or `R2_*` values for cloud storage
 - `PAYMOB_*` values for payment integration
-- `FFMPEG_PATH` and `FFPROBE_PATH`
+- `MUX_TOKEN_ID`, `MUX_TOKEN_SECRET`, `MUX_WEBHOOK_SECRET`, `MUX_SIGNING_KEY_ID`, `MUX_SIGNING_PRIVATE_KEY`, `MUX_PLAYBACK_TOKEN_TTL`
 
 Important: do not commit your `.env` file to version control. Keep secrets in your local environment or deployment secret manager.
 
@@ -151,7 +151,7 @@ Create the storage symlink if needed:
 php artisan storage:link
 ```
 
-This project supports private media storage and generated public links for uploaded assets. For video processing, FFmpeg and FFprobe must be available and configured in `.env`.
+Original course videos upload directly to private R2. Mux imports temporary signed R2 URLs for processing and signed streaming; no local video binaries or temporary video files are needed.
 
 ## Running the Application
 
@@ -175,12 +175,14 @@ npm run build
 
 ## Queue Workers
 
-The app uses Laravel queues for payment and media processing tasks.
+The app uses Laravel queues for payment and background tasks. The `video-processing`
+queue now makes lightweight Mux import requests. See the [Mux deployment guide](docs/mux-video.md)
+for shared hosting cron commands and webhook configuration.
 
 Example:
 
 ```bash
-php artisan queue:work --queue=payments,video-processing,default --tries=5 --timeout=22000
+php artisan queue:work --queue=payments,default --tries=5 --timeout=120
 ```
 
 ## Scheduler
@@ -211,7 +213,7 @@ composer dump-autoload
 
 - Set `APP_ENV=production` and `APP_DEBUG=false` in production.
 - Configure robust database, queue, cache, and storage settings.
-- Ensure FFmpeg and FFprobe are installed on the server.
+- Configure Mux credentials, the signed webhook, and the video-processing queue (see docs/mux-video.md).
 - Secure your `.env` file and do not expose secret values in Git history.
 - Ensure your storage bucket remains private and CORS policies are configured correctly for signed media URLs.
 - Run migrations and queue workers after deployment.

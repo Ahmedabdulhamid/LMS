@@ -1,0 +1,4 @@
+# Minimal configuration for ephemeral test keys on Windows and Linux.
+[req]
+distinguished_name = req_distinguished_name
+[req_distinguished_name]

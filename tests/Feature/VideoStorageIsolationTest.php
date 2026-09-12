@@ -10,17 +10,15 @@ use Tests\TestCase;
 
 class VideoStorageIsolationTest extends TestCase
 {
-    public function test_hls_is_read_from_private_storage_and_images_use_public_urls(): void
+    public function test_original_urls_are_signed_by_private_storage_and_images_use_public_urls(): void
     {
         Storage::fake('r2_public');
         Storage::fake('r2_private');
         config(['filesystems.disks.r2_public.url' => 'https://images.example.test']);
-        $path = 'courses/1/videos/2/hls/master.m3u8';
-        Storage::disk('r2_public')->put($path, 'public copy');
-        Storage::disk('r2_private')->put($path, 'private playlist');
-
+        $path = 'instructors/1/courses/1/videos/master.mp4';
+        Storage::disk('r2_private')->buildTemporaryUrlsUsing(fn ($key, $expires, $options) => 'https://private.example.test/'.$key);
         $service = app(R2FileService::class);
-        $this->assertSame('private playlist', $service->get($path));
+        $this->assertSame('https://private.example.test/'.$path, $service->temporaryUrl($path));
         $this->assertSame('https://images.example.test/courses/cover.jpg', $service->publicUrl('courses/cover.jpg'));
     }
 
