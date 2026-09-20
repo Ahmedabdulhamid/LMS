@@ -44,6 +44,11 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         require_once app_path('Support/settings.php');
+
+        $this->app->bind(
+            \Filament\Auth\Notifications\VerifyEmail::class,
+            \App\Notifications\VerifyEmail::class,
+        );
     }
 
     /**

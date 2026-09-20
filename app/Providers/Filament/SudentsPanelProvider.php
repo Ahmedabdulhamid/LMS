@@ -4,11 +4,14 @@ namespace App\Providers\Filament;
 
 use App\Filament\Student\Pages\Dashboard;
 use App\Filament\Student\Pages\Profile;
+use App\Filament\Auth\Pages\EmailVerificationPrompt;
+use App\Filament\Auth\Pages\Login;
 use App\Filament\Student\Resources\CourseResource;
 use App\Filament\Student\Resources\PaymentResource;
 use App\Filament\Sudents\Pages\Auth\Register;
 use App\Http\Middleware\AuthenticatePanelSession;
 use App\Http\Middleware\EnsurePanelUserType;
+use App\Http\Middleware\RedirectAuthenticatedUserToOwnPanel;
 use App\Http\Middleware\SetLocale;
 use App\Services\SettingService;
 use Filament\Enums\ThemeMode;
@@ -36,10 +39,10 @@ class SudentsPanelProvider extends PanelProvider
             ->id('students')
             ->path('students')
             ->viteTheme('resources/css/filament/students/theme.css')
-            ->login()
+            ->login(Login::class)
             ->registration(Register::class)
             ->passwordReset()
-            ->emailVerification()
+            ->emailVerification(EmailVerificationPrompt::class)
             ->profile(Profile::class, isSimple: false)
             ->authGuard('student')
             ->darkMode()
@@ -72,6 +75,7 @@ class SudentsPanelProvider extends PanelProvider
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
                 StartSession::class,
+                RedirectAuthenticatedUserToOwnPanel::class,
                 SetLocale::class,
                 AuthenticatePanelSession::class,
                 // AuthenticateSession::class,
@@ -94,8 +98,16 @@ class SudentsPanelProvider extends PanelProvider
                 fn () => view('filament.components.language-switcher', ['floating' => true]),
             )
             ->renderHook(
+                PanelsRenderHook::AUTH_LOGIN_FORM_AFTER,
+                fn () => view('filament.auth.login-links'),
+            )
+            ->renderHook(
                 PanelsRenderHook::SIDEBAR_NAV_END,
                 fn () => view('student-sidebar-logout'),
+            )
+            ->renderHook(
+                PanelsRenderHook::FOOTER,
+                fn () => view('partials.site-footer'),
             );
     }
 }

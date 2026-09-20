@@ -16,8 +16,13 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies(at: '*');
-        $middleware->redirectGuestsTo(fn () => route('filament.students.auth.login'));
+        $middleware->redirectGuestsTo(fn (Request $request) => match ($request->segment(1)) {
+            'admin' => route('filament.admin.auth.login'),
+            'instructor', 'instructors' => route('filament.instructors.auth.login'),
+            default => route('filament.students.auth.login'),
+        });
         $middleware->appendToGroup('web', SetLocale::class);
+        $middleware->appendToGroup('web', \App\Http\Middleware\RedirectAuthenticatedUserToOwnPanel::class);
         $middleware->appendToGroup('web', \App\Http\Middleware\LogAuthenticationDebug::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

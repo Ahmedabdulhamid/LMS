@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CourseVideoUploadController;
 use App\Http\Controllers\HomePageController;
+use App\Http\Controllers\FaqPageController;
 use App\Http\Controllers\MuxWebhookController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\UserDeviceTokenController;
@@ -54,6 +55,8 @@ Route::get('/locale/{locale}', function (string $locale) {
 })->name('locale.switch');
 
 Route::get('/', HomePageController::class)->name('home');
+Route::redirect('/instructor', '/instructors')->name('instructor.panel');
+Route::redirect('/student', '/students')->name('student.panel');
 Route::get('/categories', [HomePageController::class, 'categories'])->name('categories.index');
 Route::get('/courses/top-rated', [HomePageController::class, 'topRatedCourses'])->name('courses.top-rated');
 Route::get('/courses/latest', [HomePageController::class, 'latestCourses'])->name('courses.latest');
@@ -61,6 +64,9 @@ Route::get('/wishlists', WishlistsPage::class)->middleware('auth:student')->name
 Route::get('/my-courses', MyCourses::class)->middleware('auth:student')->name('my-courses.index');
 Route::get('/subscription-plans', SubscriptionPlans::class)->name('subscription-plans.index');
 Route::get('/contact', ContactPage::class)->name('contact.index');
+Route::get('/faqs', FaqPageController::class)->name('faqs.index');
+Route::get('/faqs', FaqPageController::class)->name('faqs.index');
+Route::get('/faqs', FaqPageController::class)->name('faqs.index');
 Route::get('/checkout/orders/{order:number}', CheckoutOrder::class)
     ->middleware('auth:student')
     ->name('checkout.orders.show');
@@ -75,6 +81,9 @@ Route::get('/courses/{course:slug}', ShowCourse::class)->name('courses.show');
 Route::get('/payment/callback', [PaymentController::class, 'callback'])
     ->middleware('auth:student')
     ->name('payment.callback');
+Route::get('/payment/callback/status/{order:number}', [PaymentController::class, 'status'])
+    ->middleware(['auth:student', 'throttle:30,1'])
+    ->name('payment.callback.status');
 
 Route::get('/courses/{course}/videos/{video}/playback', [VideoStreamController::class, 'playback'])
     ->middleware('throttle:30,1')->name('course-videos.stream.playback');

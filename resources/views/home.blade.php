@@ -150,6 +150,7 @@
 
     <section class="cta"><div class="container cta-card reveal"><div><span>{{ $ar ? 'هذه لحظتك' : 'THIS IS YOUR MOMENT' }}</span><h2>{{ $ar ? 'ابدأ صغيرًا. وصل بعيدًا.' : 'Start small. Go remarkably far.' }}</h2><p>{{ $ar ? 'حساب واحد يفتح لك عالمًا كاملًا من المعرفة.' : 'One account opens a whole world of practical knowledge.' }}</p></div><aside><a class="btn white" href="{{ route('filament.students.auth.login') }}">{{ $ar ? 'انضم كطالب' : 'Join as a learner' }}</a><a class="btn clear" href="/instructors/register">{{ $ar ? 'انضم كمدرس' : 'Become an instructor' }}</a></aside></div></section>
 </main>
+@include('partials.site-footer')
 
 <footer><div class="container footer"><a class="brand" href="#top"><img src="{{ app(\App\Services\SettingService::class)->logoUrl() }}" alt=""><b>{{ app(\App\Services\SettingService::class)->name() }}</b></a><p>© {{ date('Y') }} {{ app(\App\Services\SettingService::class)->name() }}. {{ $ar ? 'جميع الحقوق محفوظة.' : 'All rights reserved.' }}</p><div><a href="/students/login">{{ $ar ? 'دخول الطالب' : 'Student login' }}</a><a href="/instructors/login">{{ $ar ? 'دخول المدرس' : 'Instructor login' }}</a></div></div></footer>
 </body>

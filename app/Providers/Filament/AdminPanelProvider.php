@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Http\Middleware\AuthenticatePanelSession;
 use App\Http\Middleware\EnsurePanelUserType;
+use App\Http\Middleware\RedirectAuthenticatedUserToOwnPanel;
 use App\Http\Middleware\SetLocale;
 use App\Livewire\AdminDatabaseNotifications;
 use App\Services\SettingService;
@@ -66,6 +67,7 @@ class AdminPanelProvider extends PanelProvider
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
                 StartSession::class,
+                RedirectAuthenticatedUserToOwnPanel::class,
                 SetLocale::class,
                 AuthenticatePanelSession::class,
                 // AuthenticateSession::class,
@@ -86,6 +88,10 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook(
                 PanelsRenderHook::SIMPLE_LAYOUT_START,
                 fn () => view('filament.components.language-switcher', ['floating' => true]),
+            )
+            ->renderHook(
+                PanelsRenderHook::FOOTER,
+                fn () => view('partials.site-footer'),
             );
     }
 }

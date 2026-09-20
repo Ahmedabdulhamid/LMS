@@ -33,6 +33,7 @@
         </div>
     </header>
     {{ $slot }}
+    @include('partials.site-footer')
     @filamentScripts
 </body>
 </html>

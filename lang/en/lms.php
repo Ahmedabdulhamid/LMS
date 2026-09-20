@@ -21,6 +21,9 @@ return [
         'forbidden_panel' => 'This account is not allowed to access this panel.',
         'inactive' => 'This account is inactive.',
     ],
+    'validation' => [
+        'phone_unique' => 'This phone number is already registered.',
+    ],
     'actions' => [
         'back' => 'Back',
         'continue' => 'Continue',
@@ -99,6 +102,7 @@ return [
         'change_password' => 'Change password',
     ],
     'help' => [
+        'leave_blank_if_current' => 'Leave this field blank to keep the current value.',
         'add_specialization' => 'Add specialization',
         'add_skill' => 'Add a skill',
         'photo_1mb' => 'Upload a clear square photo, up to 1 MB.',
@@ -182,15 +186,6 @@ return [
             'fixed' => 'Fixed',
         ],
     ],
-    'faqs' => [
-        'tab_title' => 'FAQ',
-        'question' => 'Question',
-        'answer' => 'Answer',
-        'fields' => [
-            'question' => 'Question',
-            'answer' => 'Answer',
-        ],
-    ],
     'subscription_plans' => [
         'plan_details' => 'Plan details',
         'fields' => [
@@ -253,6 +248,13 @@ return [
         'placeholders' => ['key' => 'site_name', 'value' => 'Enter setting value'],
     ],
     'faqs' => [
+        'tab_title' => 'FAQ details',
+        'question' => 'Question',
+        'answer' => 'Answer',
+        'fields' => [
+            'question' => 'Question',
+            'answer' => 'Answer',
+        ],
         'hero' => [
             'kicker' => 'Knowledge base',
             'title' => 'Frequently asked questions',

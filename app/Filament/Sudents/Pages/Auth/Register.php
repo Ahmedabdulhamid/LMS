@@ -58,7 +58,10 @@ class Register extends BaseRegister
                             ->label(__('lms.fields.phone'))
                             ->tel()
                             ->prefixIcon('heroicon-o-phone')
-                            ->unique(ignoreRecord: true)
+                            ->unique($this->getUserModel(), 'phone')
+                            ->validationMessages([
+                                'unique' => __('lms.validation.phone_unique'),
+                            ])
                             ->maxLength(20),
                         Textarea::make('bio')
                             ->label(__('lms.fields.bio'))

@@ -4,8 +4,11 @@ namespace App\Providers\Filament;
 
 use App\Filament\Instructors\Pages\Auth\EditProfile;
 use App\Filament\Instructors\Pages\Dashboard;
+use App\Filament\Auth\Pages\EmailVerificationPrompt;
+use App\Filament\Auth\Pages\Login;
 use App\Http\Middleware\AuthenticatePanelSession;
 use App\Http\Middleware\EnsurePanelUserType;
+use App\Http\Middleware\RedirectAuthenticatedUserToOwnPanel;
 use App\Http\Middleware\SetLocale;
 use App\Services\Register as ServicesRegister;
 use App\Services\SettingService;
@@ -38,9 +41,9 @@ class InstructorsPanelProvider extends PanelProvider
                 'primary' => Color::Amber,
             ])
             ->registration(ServicesRegister::class)
-            ->login()
+            ->login(Login::class)
             ->passwordReset()
-            ->emailVerification()
+            ->emailVerification(EmailVerificationPrompt::class)
             ->profile(EditProfile::class, isSimple: false)
             ->authGuard('instructor')
             ->darkMode()
@@ -70,6 +73,7 @@ class InstructorsPanelProvider extends PanelProvider
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
                 StartSession::class,
+                RedirectAuthenticatedUserToOwnPanel::class,
                 SetLocale::class,
                 AuthenticatePanelSession::class,
                 // AuthenticateSession::class,
@@ -92,8 +96,16 @@ class InstructorsPanelProvider extends PanelProvider
                 fn () => view('filament.components.language-switcher', ['floating' => true]),
             )
             ->renderHook(
+                PanelsRenderHook::AUTH_LOGIN_FORM_AFTER,
+                fn () => view('filament.auth.login-links'),
+            )
+            ->renderHook(
                 PanelsRenderHook::HEAD_END,
                 fn () => view('filament.components.r2-uploader-script'),
+            )
+            ->renderHook(
+                PanelsRenderHook::FOOTER,
+                fn () => view('partials.site-footer'),
             );
     }
 }

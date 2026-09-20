@@ -16,6 +16,7 @@ use App\Services\R2VideoUploadService;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
@@ -180,6 +181,49 @@ class VideoStreamingTest extends TestCase
         }
         $this->assertStringContainsString('no-store', $response->headers->get('Cache-Control'));
         $this->assertStringNotContainsString('token=', $video->refresh()->toJson());
+    }
+
+    public function test_owner_can_preview_premium_video_with_supported_private_key_formats(): void
+    {
+        [$course, $video] = $this->courseVideo();
+        $video->forceFill(['mux_playback_id' => 'signedPlayback1', 'is_free' => false, 'is_published' => false])->saveQuietly();
+        $this->actingAs($course->instructor, 'instructor');
+        Http::preventStrayRequests();
+        $options = ['config' => base_path('tests/Fixtures/openssl.cnf'), 'private_key_bits' => 2048, 'private_key_type' => OPENSSL_KEYTYPE_RSA];
+        $key = openssl_pkey_new($options);
+        openssl_pkey_export($key, $pem, null, $options);
+        $verificationKey = new Key(openssl_pkey_get_details($key)['key'], 'RS256');
+        foreach ([$pem, base64_encode($pem), str_replace("\n", '\\n', $pem)] as $privateKey) {
+            config(['services.mux.signing_key_id' => 'previewKey', 'services.mux.signing_private_key' => $privateKey, 'services.mux.playback_token_ttl' => 900]);
+            $response = $this->getJson(route('course-videos.stream.playback', [$course, $video]))->assertOk();
+            $url = $response->json('hls');
+            $this->assertSame('stream.mux.com', parse_url($url, PHP_URL_HOST));
+            $this->assertSame('/signedPlayback1.m3u8', parse_url($url, PHP_URL_PATH));
+            parse_str(parse_url($url, PHP_URL_QUERY), $query);
+            $this->assertNotEmpty($query['token']);
+            $claims = JWT::decode($query['token'], ['previewKey' => $verificationKey]);
+            $this->assertSame('signedPlayback1', $claims->sub);
+            $this->assertSame('v', $claims->aud);
+            $this->assertEqualsWithDelta(now()->timestamp + 900, $claims->exp, 2);
+        }
+        $markup = Blade::render('<x-course-video-player :course="$course" :video="$video" />', compact('course', 'video'));
+        $this->assertStringContainsString('data-playback="'.route('course-videos.stream.playback', [$course, $video]).'"', $markup);
+        $this->assertStringNotContainsString('token=', $markup);
+        $this->assertSame('signedPlayback1', $video->refresh()->mux_playback_id);
+        Http::assertNothingSent();
+    }
+
+    public function test_missing_signing_key_fails_before_hls_without_public_fallback(): void
+    {
+        [$course, $video] = $this->courseVideo();
+        $video->forceFill(['mux_playback_id' => 'signedPlayback1'])->saveQuietly();
+        config(['services.mux.signing_key_id' => 'key1', 'services.mux.signing_private_key' => null]);
+        Http::preventStrayRequests();
+        $response = $this->actingAs($course->instructor, 'instructor')
+            ->getJson(route('course-videos.stream.playback', [$course, $video]))->assertStatus(503);
+        $this->assertNull($response->json('hls'));
+        $this->assertSame('signedPlayback1', $video->refresh()->mux_playback_id);
+        Http::assertNothingSent();
     }
 
     public function test_video_runtime_does_not_require_local_transcoding(): void

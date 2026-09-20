@@ -79,7 +79,7 @@ async function initialize(container) {
         const overlay = new shaka.ui.Overlay(player, container, video);
         players.set(container, { player, overlay });
         overlay.configure({
-            addBigPlayButton: true,
+            bigButtons: ['play_pause_buffering'],
             controlPanelElements: ['play_pause', 'time_and_duration', 'spacer', 'mute', 'volume', 'overflow_menu', 'picture_in_picture', 'fullscreen'],
             overflowMenuButtons: ['quality', 'playback_rate', 'picture_in_picture'],
             seekBarColors: { base: 'rgba(255,255,255,.25)', buffered: 'rgba(255,255,255,.5)', played: '#f59e0b' },

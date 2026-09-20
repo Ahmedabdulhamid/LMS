@@ -21,6 +21,9 @@ return [
         'forbidden_panel' => 'هذا الحساب غير مسموح له بالدخول إلى هذه اللوحة.',
         'inactive' => 'هذا الحساب غير نشط.',
     ],
+    'validation' => [
+        'phone_unique' => 'رقم الهاتف هذا مسجل بالفعل.',
+    ],
     'actions' => [
         'back' => 'رجوع',
         'continue' => 'متابعة',
@@ -99,6 +102,7 @@ return [
         'change_password' => 'تغيير كلمة المرور',
     ],
     'help' => [
+        'leave_blank_if_current' => 'اترك هذا الحقل فارغًا للاحتفاظ بالقيمة الحالية.',
         'add_specialization' => 'أضف تخصصاً',
         'add_skill' => 'أضف مهارة',
         'photo_1mb' => 'ارفع صورة مربعة وواضحة بحد أقصى 1 ميجابايت.',
@@ -253,6 +257,13 @@ return [
         'placeholders' => ['key' => 'site_name', 'value' => 'أدخل قيمة الإعداد'],
     ],
     'faqs' => [
+        'tab_title' => 'تفاصيل السؤال الشائع',
+        'question' => 'السؤال',
+        'answer' => 'الإجابة',
+        'fields' => [
+            'question' => 'السؤال',
+            'answer' => 'الإجابة',
+        ],
         'hero' => [
             'kicker' => 'قاعدة المعرفة',
             'title' => 'الأسئلة الشائعة',

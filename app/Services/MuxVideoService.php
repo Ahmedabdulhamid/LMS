@@ -12,6 +12,7 @@ class MuxVideoService
     public function importVideo(string $reference, string $sourceUrl): array
     {
         return $this->request('POST', '/assets', $this->assetSettings($reference) + ['inputs' => [['url' => $sourceUrl]]]);
+
     }
 
     public function getAsset(string $id): array

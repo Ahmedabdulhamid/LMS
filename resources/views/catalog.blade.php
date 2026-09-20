@@ -27,4 +27,4 @@
     </div></section>
 </main>
 <footer><div class="container footer"><a class="brand" href="{{ route('home') }}"><img src="{{ app(\App\Services\SettingService::class)->logoUrl() }}" alt=""><b>{{ app(\App\Services\SettingService::class)->name() }}</b></a><p>© {{ date('Y') }} {{ app(\App\Services\SettingService::class)->name() }}</p><div><a href="{{ route('home') }}">{{ $ar ? 'الرئيسية' : 'Home' }}</a></div></div></footer>
-</body></html>
+@include('partials.site-footer')</body></html>

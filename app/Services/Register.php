@@ -64,11 +64,14 @@ class Register extends BaseRegister
                             ->label(__('lms.fields.phone'))
                             ->tel()
                             ->prefixIcon('heroicon-o-phone')
+                            ->unique($this->getUserModel(), 'phone')
                             ->maxLength(20),
                         DatePicker::make('birthday')
                             ->label(__('lms.fields.birthday'))
                             ->displayFormat('F j, Y')
-                            ->maxDate(now()),
+                            ->minDate(now()->subYears(70))
+                            ->maxDate(now()->subYears(23))
+                            ->native(false),
                         Select::make('gender')
                             ->label(__('lms.fields.gender'))
                             ->native(false)
@@ -117,9 +120,9 @@ class Register extends BaseRegister
                                 TextInput::make('field_of_study')->label(__('lms.fields.field_study')),
                             ])
                             ->columns(3)
-                            ->defaultItems(0)
+                            ->defaultItems(1)
                             ->collapsed()
-                            ->itemLabel(fn (array $state): ?string => $state['degree'] ?? null)
+                            ->itemLabel(fn(array $state): ?string => $state['degree'] ?? null)
                             ->addActionLabel(__('lms.actions.add_education')),
                         Repeater::make('certifications')
                             ->label(__('lms.fields.certifications'))
@@ -128,23 +131,25 @@ class Register extends BaseRegister
                                 TextInput::make('organization')->label(__('lms.fields.issuing_organization'))->required(),
                             ])
                             ->columns(2)
-                            ->defaultItems(0)
+                            ->defaultItems(1)
                             ->collapsed()
-                            ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
+                            ->itemLabel(fn(array $state): ?string => $state['name'] ?? null)
                             ->addActionLabel(__('lms.actions.add_certification')),
                         Repeater::make('experiences')
                             ->label(__('lms.fields.work_experience'))
                             ->schema([
                                 TextInput::make('job_title')->label(__('lms.fields.job_title'))->required(),
                                 TextInput::make('company')->label(__('lms.fields.company'))->required(),
-                                DatePicker::make('start_date')->label(__('lms.fields.start_date')),
-                                DatePicker::make('end_date')->label(__('lms.fields.end_date'))->afterOrEqual('start_date'),
+                                DatePicker::make('start_date')->label(__('lms.fields.start_date'))->native(false)->maxDate(now()),
+                                DatePicker::make('end_date')->label(__('lms.fields.end_date'))->afterOrEqual('start_date')->maxDate(now())->native(false)
+
+                                    ->helperText(__('lms.help.leave_blank_if_current')),
                                 Textarea::make('description')->label(__('lms.fields.description'))->columnSpanFull(),
                             ])
                             ->columns(2)
-                            ->defaultItems(0)
+                            ->defaultItems(1)
                             ->collapsed()
-                            ->itemLabel(fn (array $state): ?string => $state['job_title'] ?? null)
+                            ->itemLabel(fn(array $state): ?string => $state['job_title'] ?? null)
                             ->addActionLabel(__('lms.actions.add_experience')),
                         Repeater::make('achivements')
                             ->label(__('lms.fields.achievements'))
@@ -158,9 +163,9 @@ class Register extends BaseRegister
                                 Textarea::make('description')->label(__('lms.fields.description'))->columnSpanFull(),
                             ])
                             ->columns(2)
-                            ->defaultItems(0)
+                            ->defaultItems(1)
                             ->collapsed()
-                            ->itemLabel(fn (array $state): ?string => $state['title'] ?? null)
+                            ->itemLabel(fn(array $state): ?string => $state['title'] ?? null)
                             ->addActionLabel(__('lms.actions.add_achievement')),
                     ]),
                 Step::make(__('lms.steps.social'))
@@ -175,8 +180,8 @@ class Register extends BaseRegister
                         $this->socialLinkInput('youtube_url', __('lms.fields.youtube')),
                     ]),
             ])
-                ->nextAction(fn (Action $action) => $action->label(__('lms.actions.continue')))
-                ->previousAction(fn (Action $action) => $action->label(__('lms.actions.back')))
+                ->nextAction(fn(Action $action) => $action->label(__('lms.actions.continue')))
+                ->previousAction(fn(Action $action) => $action->label(__('lms.actions.back')))
                 ->submitAction(new HtmlString(Blade::render(<<<'BLADE'
                     <x-filament::button type="submit" size="lg" icon="heroicon-o-user-plus">
                     {{ __('lms.actions.create_instructor') }}
